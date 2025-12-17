@@ -19,11 +19,6 @@ public class Expenses {
     private double value;
 
     @ManyToOne(fetch = FetchType.LAZY,
-                cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("category_id")
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinCalumn("sub_category_id")
     private SubCategory subCategory;
@@ -60,14 +55,6 @@ public class Expenses {
 
     public void setValue(double value) {
         this.value = value;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
     }
 
     public SubCategory getSubCategory() {

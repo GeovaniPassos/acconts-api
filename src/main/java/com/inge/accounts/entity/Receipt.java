@@ -14,7 +14,7 @@ public class Receipt {
     private String name;
     private String description;
     private double value;
-    private Category category;
+    private CategoryReceipt categoryReceipt;
     private Date date;
 
     public Long getId() {
