@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
+@Table(name = "tb_expenses")
 public class Expenses {
 
     @Id
@@ -14,16 +15,16 @@ public class Expenses {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column
+    @Column(nullable = true)
     private String description;
 
     @Column(nullable = true)
     private double value;
-/*
+
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "category_id")*/
-    private String category;
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false)
     private boolean payment;
@@ -58,20 +59,12 @@ public class Expenses {
     public void setValue(double value) {
         this.value = value;
     }
-/*
+
     public Category getCategory() {
         return category;
     }
 
     public void setCategory(Category category) {
-        this.category = category;
-    }*/
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
         this.category = category;
     }
 

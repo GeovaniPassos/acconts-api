@@ -4,7 +4,5 @@ import com.inge.accounts.enums.TransactionType;
 
 public record CategoryDto(Long id,
                           String name,
-                          String description
-
-                          ) {
-}
+                          String type
+                          ) { }

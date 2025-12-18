@@ -18,8 +18,7 @@ public class ExpensesController {
 
     @PostMapping
     public ResponseEntity<ExpensesDTO> create(@RequestBody ExpensesDTO dto) {
-        ExpensesDTO result;
-        result = service.createExpenses(dto);
+        ExpensesDTO result = service.createExpenses(dto);
         return ResponseEntity.ok(result);
     }
 }

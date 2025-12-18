@@ -8,7 +8,7 @@ public record ExpensesDTO(Long id,
                           String name,
                           String description,
                           double value,
-                          String category,
+                          String categoryName,
                           boolean payment,
                           Date date
 ) {
