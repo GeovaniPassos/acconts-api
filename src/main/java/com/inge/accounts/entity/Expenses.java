@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
 public class Expenses {
 
     @Id
@@ -12,21 +13,22 @@ public class Expenses {
 
     @Column(nullable = false, unique = true)
     private String name;
+
     @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private double value;
-
+/*
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("sub_category_id")
-    private SubCategory subCategory;
+    @JoinColumn(name = "category_id")*/
+    private String category;
 
     @Column(nullable = false)
     private boolean payment;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date date;
 
     public Long getId() {
@@ -56,13 +58,21 @@ public class Expenses {
     public void setValue(double value) {
         this.value = value;
     }
-
-    public SubCategory getSubCategory() {
-        return subCategory;
+/*
+    public Category getCategory() {
+        return category;
     }
 
-    public void setSubCategory(SubCategory subCategory) {
-        this.subCategory = subCategory;
+    public void setCategory(Category category) {
+        this.category = category;
+    }*/
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public boolean isPayment() {
