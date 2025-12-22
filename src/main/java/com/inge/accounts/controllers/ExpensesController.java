@@ -15,7 +15,7 @@ public class ExpensesController {
 
     @Autowired
     private ExpensesService service;
-
+git
     @PostMapping
     public ResponseEntity<ExpensesDTO> create(@RequestBody ExpensesDTO dto) {
         ExpensesDTO result = service.createExpenses(dto);
