@@ -1,5 +1,6 @@
 package com.inge.accounts.services;
 
+import com.inge.accounts.dtos.CategoryDto;
 import com.inge.accounts.entity.Category;
 import com.inge.accounts.enums.TransactionType;
 import com.inge.accounts.repository.CategoryRepository;
@@ -14,10 +15,16 @@ public class CategoryService {
     private CategoryRepository repository;
 
     @Transactional
-    public Category findOrCreate(String name, TransactionType type) {
+    public CategoryDto findOrCreate(String name, String type) {
+        //TODO: Terminar de ajustar a conversão de categoru para categoryDto
+
         return repository.findByNameAndType(name, type).orElseGet(() -> {
-           Category newCategory = new Category(name, type);
+           Category newCategory = new Category(name, TransactionType.fromString(type));
            return repository.save(newCategory);
         });
+    }
+
+    public Category create(String name) {
+        return null;
     }
 }

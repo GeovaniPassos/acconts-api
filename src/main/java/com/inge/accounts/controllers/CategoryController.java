@@ -20,8 +20,8 @@ public class CategoryController {
     private CategoryService service;
 
     @PostMapping
-    public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto dto, TransactionType type) {
-        CategoryDto result = service.findOrCreate(dto.name(), type);
+    public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto dto) {
+        CategoryDto result = service.findOrCreate(dto.name(), dto.type());
         return ResponseEntity.ok(result);
     }
 }

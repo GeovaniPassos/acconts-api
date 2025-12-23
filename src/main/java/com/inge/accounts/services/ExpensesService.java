@@ -1,5 +1,6 @@
 package com.inge.accounts.services;
 
+import com.inge.accounts.dtos.CategoryDto;
 import com.inge.accounts.dtos.ExpensesDTO;
 import com.inge.accounts.entity.Category;
 import com.inge.accounts.entity.Expenses;
@@ -18,7 +19,7 @@ public class ExpensesService {
 
     public ExpensesDTO createExpenses(ExpensesDTO dto) {
 
-        Category category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
+        CategoryDto category = categoryService.findOrCreate(dto.categoryName(), dto);
 
         Expenses entity = new Expenses();
         entity.setName(dto.name());
