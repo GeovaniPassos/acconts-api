@@ -1,6 +1,4 @@
-package com.inge.accounts.dtos;
-
-import com.inge.accounts.entity.Category;
+package com.inge.accounts.domain.dto;
 
 import java.util.Date;
 

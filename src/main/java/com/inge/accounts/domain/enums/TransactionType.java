@@ -1,4 +1,4 @@
-package com.inge.accounts.enums;
+package com.inge.accounts.domain.enums;
 
 public enum TransactionType {
     EXPENSES,

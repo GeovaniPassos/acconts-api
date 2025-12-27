@@ -1,6 +1,4 @@
-package com.inge.accounts.dtos;
-
-import com.inge.accounts.enums.TransactionType;
+package com.inge.accounts.domain.dto;
 
 public record CategoryDto(Long id,
                           String name,

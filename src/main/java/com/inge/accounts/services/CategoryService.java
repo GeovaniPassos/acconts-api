@@ -1,30 +1,43 @@
 package com.inge.accounts.services;
 
-import com.inge.accounts.dtos.CategoryDto;
-import com.inge.accounts.entity.Category;
-import com.inge.accounts.enums.TransactionType;
+import com.inge.accounts.domain.dto.CategoryDto;
+import com.inge.accounts.domain.entity.Category;
+import com.inge.accounts.domain.enums.TransactionType;
+import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CategoryService {
 
     @Autowired
     private CategoryRepository repository;
+    private CategoryDto dto;
 
     @Transactional
-    public CategoryDto findOrCreate(String name, String type) {
-        //TODO: Terminar de ajustar a conversão de categoru para categoryDto
+    public CategoryDto create(CategoryDto dto) {
 
-        return repository.findByNameAndType(name, type).orElseGet(() -> {
-           Category newCategory = new Category(name, TransactionType.fromString(type));
-           return repository.save(newCategory);
-        });
+        TransactionType type = TransactionType.fromString(dto.type());
+
+        if (repository.existsByNameAndType(dto.name(), type)) {
+            throw new RuntimeException("Categoria já existe");
+        }
+
+        Category category =  CategoryMapper.toEntity(dto);
+        category = repository.save(category);
+
+        return CategoryMapper.toDto(category);
+
     }
 
-    public Category create(String name) {
-        return null;
+    public List<CategoryDto> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(CategoryMapper::toDto)
+                .toList();
     }
 }

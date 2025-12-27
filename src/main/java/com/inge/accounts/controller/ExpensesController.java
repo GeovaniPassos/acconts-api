@@ -1,6 +1,6 @@
-package com.inge.accounts.controllers;
+package com.inge.accounts.controller;
 
-import com.inge.accounts.dtos.ExpensesDTO;
+import com.inge.accounts.domain.dto.ExpensesDTO;
 import com.inge.accounts.services.ExpensesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,10 +1,9 @@
 package com.inge.accounts.services;
 
-import com.inge.accounts.dtos.CategoryDto;
-import com.inge.accounts.dtos.ExpensesDTO;
-import com.inge.accounts.entity.Category;
-import com.inge.accounts.entity.Expenses;
-import com.inge.accounts.enums.TransactionType;
+import com.inge.accounts.domain.dto.ExpensesDTO;
+import com.inge.accounts.domain.entity.Category;
+import com.inge.accounts.domain.entity.Expenses;
+import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.repository.ExpensesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,18 @@ public class ExpensesService {
     @Autowired
     private CategoryService categoryService;
 
+    public ExpensesService(ExpensesRepository expensesRepository,
+                           CategoryService categoryService) {
+        this.expensesRepository = expensesRepository;
+        this.categoryService = categoryService;
+    }
+
     public ExpensesDTO createExpenses(ExpensesDTO dto) {
 
-        CategoryDto category = categoryService.findOrCreate(dto.categoryName(), dto);
+        Category category = categoryService.findByNameAndType(dto.categoryName(), TransactionType.EXPENSES);
+
+        TransactionType type = TransactionType.fromString(categoryDto.type());
+
 
         Expenses entity = new Expenses();
         entity.setName(dto.name());

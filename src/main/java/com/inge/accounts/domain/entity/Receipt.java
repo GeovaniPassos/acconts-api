@@ -1,4 +1,4 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
 import jakarta.persistence.*;
 

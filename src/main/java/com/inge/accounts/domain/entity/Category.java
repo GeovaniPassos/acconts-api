@@ -1,6 +1,6 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
-import com.inge.accounts.enums.TransactionType;
+import com.inge.accounts.domain.enums.TransactionType;
 import jakarta.persistence.*;
 
 @Entity
@@ -23,6 +23,14 @@ public class Category {
         this.type = type;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -41,4 +49,6 @@ public class Category {
 
     public Category() {
     }
+
+
 }
