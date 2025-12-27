@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/categories")
 public class CategoryController {
@@ -24,13 +26,14 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    /*
-    @PostMapping
-    public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto dto) {
-        CategoryDto result = service.create(dto.name(), dto.type());
+    @GetMapping
+    public  ResponseEntity<List<CategoryDto>> findAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
 
-        return ResponseEntity.ok(result);
-    }*/
-
+    @GetMapping("/{id}")
+    public CategoryDto findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
 
 }

@@ -2,7 +2,6 @@ package com.inge.accounts.controller;
 
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.services.ExpensesService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +13,7 @@ public class ExpensesController {
 
     private final ExpensesService service;
 
-    public ExpensesController(ExpensesService service) {
-        this.service = service;
-    }
+    public ExpensesController(ExpensesService service) {this.service = service;}
 
     @PostMapping
     public ResponseEntity<ExpensesDto> create(@RequestBody ExpensesDto dto) {

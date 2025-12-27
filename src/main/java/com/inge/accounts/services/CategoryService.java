@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -21,7 +20,6 @@ public class CategoryService {
 
     @Transactional
     public CategoryDto create(CategoryDto dto) {
-
         TransactionType type = TransactionType.fromString(dto.type());
 
         if (repository.existsByNameAndType(dto.name(), type)) {
@@ -43,8 +41,20 @@ public class CategoryService {
     }
 
     public Category findByNameAndType(String name, TransactionType type) {
-
         return repository.findByNameAndType(name, type);
-
     }
+
+    public CategoryDto findById(Long id) {
+        return repository.findById(id)
+                .map(CategoryMapper::toDto)
+                .orElseThrow(() ->
+                        new RuntimeException("Categoria não encontrada!"));
+    }
+
+    public void delete(Long id) {
+        repository.delete(repository.findById(id))
+                .orElseThrow(() ->
+                        new RuntimeException("Categoria não encontrada!"));
+    }
+
 }
