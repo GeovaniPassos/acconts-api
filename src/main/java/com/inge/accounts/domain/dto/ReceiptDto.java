@@ -4,7 +4,7 @@ import com.inge.accounts.domain.entity.Category;
 
 import java.util.Date;
 
-public record ReceiptDTO(Long id,
+public record ReceiptDto(Long id,
                          String name,
                          String description,
                          double value,

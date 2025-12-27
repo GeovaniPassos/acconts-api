@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Optional<Category> findByNameAndType(String name, TransactionType type);
+    Category findByNameAndType(String name, TransactionType type);
 
     boolean existsByNameAndType(String name, TransactionType type);
 }

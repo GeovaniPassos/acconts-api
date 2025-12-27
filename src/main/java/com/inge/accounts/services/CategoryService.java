@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -24,7 +25,7 @@ public class CategoryService {
         TransactionType type = TransactionType.fromString(dto.type());
 
         if (repository.existsByNameAndType(dto.name(), type)) {
-            throw new RuntimeException("Categoria já existe");
+            throw new RuntimeException("Categoria já existe com o ID: " + repository.getReferenceById(dto.id()));
         }
 
         Category category =  CategoryMapper.toEntity(dto);
@@ -39,5 +40,11 @@ public class CategoryService {
                 .stream()
                 .map(CategoryMapper::toDto)
                 .toList();
+    }
+
+    public Category findByNameAndType(String name, TransactionType type) {
+
+        return repository.findByNameAndType(name, type);
+
     }
 }

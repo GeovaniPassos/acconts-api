@@ -1,20 +1,22 @@
 package com.inge.accounts.services;
 
-import com.inge.accounts.domain.dto.ExpensesDTO;
+import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
 import com.inge.accounts.domain.enums.TransactionType;
+import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.repository.ExpensesRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ExpensesService {
 
-    @Autowired
-    private ExpensesRepository expensesRepository;
-    @Autowired
-    private CategoryService categoryService;
+    private final ExpensesRepository expensesRepository;
+    private final CategoryService categoryService;
 
     public ExpensesService(ExpensesRepository expensesRepository,
                            CategoryService categoryService) {
@@ -22,31 +24,26 @@ public class ExpensesService {
         this.categoryService = categoryService;
     }
 
-    public ExpensesDTO createExpenses(ExpensesDTO dto) {
+    @Transactional
+    public ExpensesDto createExpenses(ExpensesDto dto) {
 
-        Category category = categoryService.findByNameAndType(dto.categoryName(), TransactionType.EXPENSES);
+        Category category = categoryService.findByNameAndType(
+                dto.categoryName(),
+                TransactionType.EXPENSES);
 
-        TransactionType type = TransactionType.fromString(categoryDto.type());
+        Expenses expenses = ExpensesMapper.toEntity(dto, category);
 
+        expenses = expensesRepository.save(expenses);
 
-        Expenses entity = new Expenses();
-        entity.setName(dto.name());
-        entity.setDescription(dto.description());
-        entity.setValue(dto.value());
-        entity.setCategory(category);
-        entity.setPayment(dto.payment());
-        entity.setDate(dto.date());
+        return ExpensesMapper.toDto(expenses);
 
-        entity = expensesRepository.save(entity);
+    }
 
-        return new ExpensesDTO(
-                entity.getId(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getValue(),
-                entity.getCategory().getName(),
-                entity.isPayment(),
-                entity.getDate());
-
+    @Transactional
+    public List<ExpensesDto> findAll() {
+        return expensesRepository.findAll()
+                .stream()
+                .map(ExpensesMapper::toDto)
+                .toList();
     }
 }
