@@ -46,4 +46,21 @@ public class ExpensesService {
                 .map(ExpensesMapper::toDto)
                 .toList();
     }
+
+    public ExpensesDto findById(Long id) {
+        return expensesRepository.findById(id)
+                .map(ExpensesMapper::toDto)
+                .orElseThrow(() ->
+                        new RuntimeException("Despesa não encontrada!"));
+    }
+
+    public void delete(Long id) {
+        Expenses expenses = expensesRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Categoria não encontrada!"));
+        expensesRepository.delete(expenses);
+    }
+
+    //TODO: Criar a função de update
+
 }

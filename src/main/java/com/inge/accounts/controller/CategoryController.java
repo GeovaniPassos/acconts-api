@@ -36,4 +36,11 @@ public class CategoryController {
         return service.findById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    //TODO: Criar o endpoint update
 }

@@ -15,46 +15,51 @@ import java.util.List;
 public class CategoryService {
 
     @Autowired
-    private CategoryRepository repository;
+    private CategoryRepository categoryRepository;
     private CategoryDto dto;
 
     @Transactional
     public CategoryDto create(CategoryDto dto) {
         TransactionType type = TransactionType.fromString(dto.type());
 
-        if (repository.existsByNameAndType(dto.name(), type)) {
-            throw new RuntimeException("Categoria já existe com o ID: " + repository.getReferenceById(dto.id()));
+        if (categoryRepository.existsByNameAndType(dto.name(), type)) {
+            throw new RuntimeException("Categoria já existe com o ID: " + categoryRepository.getReferenceById(dto.id()));
         }
 
         Category category =  CategoryMapper.toEntity(dto);
-        category = repository.save(category);
+        category = categoryRepository.save(category);
 
         return CategoryMapper.toDto(category);
 
     }
 
     public List<CategoryDto> findAll() {
-        return repository.findAll()
+        return categoryRepository.findAll()
                 .stream()
                 .map(CategoryMapper::toDto)
                 .toList();
     }
 
     public Category findByNameAndType(String name, TransactionType type) {
-        return repository.findByNameAndType(name, type);
+        return categoryRepository.findByNameAndType(name, type);
     }
 
     public CategoryDto findById(Long id) {
-        return repository.findById(id)
+        return categoryRepository.findById(id)
                 .map(CategoryMapper::toDto)
                 .orElseThrow(() ->
                         new RuntimeException("Categoria não encontrada!"));
     }
 
     public void delete(Long id) {
-        repository.delete(repository.findById(id))
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Categoria não encontrada!"));
+
+        categoryRepository.delete(category);
+
     }
+
+    //TODO: Criar a função de update
 
 }

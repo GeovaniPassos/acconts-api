@@ -25,4 +25,17 @@ public class ExpensesController {
     public ResponseEntity<List<ExpensesDto>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
+
+    @GetMapping("/{id}")
+    public ExpensesDto findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    //TODO: Criar o endpoint update
 }
