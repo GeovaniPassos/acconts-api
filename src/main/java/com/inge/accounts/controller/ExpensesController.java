@@ -13,7 +13,9 @@ public class ExpensesController {
 
     private final ExpensesService service;
 
-    public ExpensesController(ExpensesService service) {this.service = service;}
+    public ExpensesController(ExpensesService service) {
+        this.service = service;
+    }
 
     @PostMapping
     public ResponseEntity<ExpensesDto> create(@RequestBody ExpensesDto dto) {
@@ -31,7 +33,7 @@ public class ExpensesController {
         return service.findById(id);
     }
 
-    @GetMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
