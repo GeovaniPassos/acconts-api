@@ -27,4 +27,9 @@ public class CategoryMapper {
                 entity.getType().name()
         );
     }
+
+    public static void updateEntity(Category entity, CategoryDto dto) {
+        entity.setName(dto.name());
+        entity.setType(TransactionType.valueOf(dto.type()));
+    }
 }

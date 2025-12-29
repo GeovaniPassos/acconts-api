@@ -5,6 +5,7 @@ import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.repository.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class CategoryService {
         return categoryRepository.findByNameAndType(name, type);
     }
 
+
     public CategoryDto findById(Long id) {
         return categoryRepository.findById(id)
                 .map(CategoryMapper::toDto)
@@ -51,6 +53,7 @@ public class CategoryService {
                         new RuntimeException("Categoria não encontrada!"));
     }
 
+    @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->
@@ -60,6 +63,15 @@ public class CategoryService {
 
     }
 
-    //TODO: Criar a função de update
+    @Transactional
+    public CategoryDto update(Long id, CategoryDto dto) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Despesa não encontrada!"));
+
+        CategoryMapper.updateEntity(category, dto);
+
+        return CategoryMapper.toDto(category);
+    }
 
 }

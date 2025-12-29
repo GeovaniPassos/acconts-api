@@ -42,5 +42,10 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO: Criar o endpoint update
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDto> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
+        CategoryDto updated = service.update(id, dto);
+
+        return ResponseEntity.ok(updated);
+    }
 }
