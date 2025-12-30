@@ -1,20 +1,36 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
-public class Receipt {
+@Entity
+@Table(name = "tb_expenses")
+public class Expenses {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = true)
     private String description;
-    private double value;
+
+    @Column(nullable = true)
+    private BigDecimal value;
+
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "category_id")
     private Category category;
+
+    @Column(nullable = false)
+    private boolean payment;
+
+    @Column(nullable = true)
     private Date date;
 
     public Long getId() {
@@ -37,11 +53,11 @@ public class Receipt {
         this.description = description;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
@@ -51,6 +67,14 @@ public class Receipt {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public boolean isPayment() {
+        return payment;
+    }
+
+    public void setPayment(boolean payment) {
+        this.payment = payment;
     }
 
     public Date getDate() {

@@ -1,35 +1,30 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
 import jakarta.persistence.*;
 
 import java.util.Date;
 
-public class Expenses {
+@Entity
+@Table(name = "tb_receipt")
+public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
-    @Column
+
     private String description;
 
     @Column(nullable = false)
     private double value;
 
-    @ManyToOne(fetch = FetchType.LAZY,
-                cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("category_id")
-    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("sub_category_id")
-    private SubCategory subCategory;
-
-    @Column(nullable = false)
-    private boolean payment;
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false)
     private Date date;
@@ -70,27 +65,14 @@ public class Expenses {
         this.category = category;
     }
 
-    public SubCategory getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(SubCategory subCategory) {
-        this.subCategory = subCategory;
-    }
-
-    public boolean isPayment() {
-        return payment;
-    }
-
-    public void setPayment(boolean payment) {
-        this.payment = payment;
-    }
-
     public Date getDate() {
         return date;
     }
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Receipt() {
     }
 }
