@@ -1,6 +1,9 @@
 package com.inge.accounts.services;
 
 import com.inge.accounts.domain.dto.CategoryDto;
+import com.inge.accounts.domain.dto.CategoryPatchDto;
+import com.inge.accounts.domain.dto.ExpensesDto;
+import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.CategoryMapper;
@@ -70,6 +73,25 @@ public class CategoryService {
                         new EntityNotFoundException("Despesa não encontrada!"));
 
         CategoryMapper.updateEntity(category, dto);
+
+        return CategoryMapper.toDto(category);
+    }
+
+    @Transactional
+    public CategoryDto patch(Long id, CategoryPatchDto dto) {
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Categoria de despesa não encontrada com id: " + id
+                ));
+
+        if (dto.name() != null) {
+            category.setName(dto.name());
+        }
+
+        if (dto.type() != null) {
+            category.setType(TransactionType.fromString(dto.type()));
+        }
 
         return CategoryMapper.toDto(category);
     }

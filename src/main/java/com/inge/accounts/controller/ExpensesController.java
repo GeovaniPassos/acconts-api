@@ -1,6 +1,7 @@
 package com.inge.accounts.controller;
 
 import com.inge.accounts.domain.dto.ExpensesDto;
+import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.services.ExpensesService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,8 @@ public class ExpensesController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO: Criar o endpoint update
+    @PatchMapping("/{id}")
+    public ResponseEntity<ExpensesDto> patch(@PathVariable Long id, @RequestBody ExpensesPatchDto dto) {
+        return ResponseEntity.ok(service.patch(id, dto));
+    }
 }

@@ -2,6 +2,7 @@ package com.inge.accounts.domain.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -19,7 +20,7 @@ public class Expenses {
     private String description;
 
     @Column(nullable = true)
-    private double value;
+    private BigDecimal value;
 
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -52,11 +53,11 @@ public class Expenses {
         this.description = description;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 

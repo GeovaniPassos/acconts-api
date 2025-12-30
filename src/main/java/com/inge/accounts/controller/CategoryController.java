@@ -1,6 +1,7 @@
 package com.inge.accounts.controller;
 
 import com.inge.accounts.domain.dto.CategoryDto;
+import com.inge.accounts.domain.dto.CategoryPatchDto;
 import com.inge.accounts.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,5 +48,10 @@ public class CategoryController {
         CategoryDto updated = service.update(id, dto);
 
         return ResponseEntity.ok(updated);
+    }
+
+    @PatchMapping("/{id}")
+    public  ResponseEntity<CategoryDto> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
+        return ResponseEntity.ok(service.patch(id, dto));
     }
 }

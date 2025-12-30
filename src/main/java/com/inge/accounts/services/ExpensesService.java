@@ -1,11 +1,13 @@
 package com.inge.accounts.services;
 
 import com.inge.accounts.domain.dto.ExpensesDto;
+import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.repository.ExpensesRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,40 @@ public class ExpensesService {
         expensesRepository.delete(expenses);
     }
 
-    //TODO: Criar a função de update
+    @Transactional
+    public ExpensesDto patch(Long id, ExpensesPatchDto dto) {
 
+        Expenses expenses = expensesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Despesa não encontrada com id: " + id
+                ));
+
+        if (dto.name() != null) {
+            expenses.setName(dto.name());
+        }
+
+        if (dto.description() != null) {
+            expenses.setDescription(dto.description());
+        }
+
+        if (dto.categoryName() != null) {
+            Category category = categoryService.findByNameAndType(
+                    dto.categoryName(), TransactionType.EXPENSES);
+            expenses.setCategory(category);
+        }
+
+        if (dto.payment() != null) {
+            expenses.setPayment(dto.payment());
+        }
+
+        if (dto.value() != null) {
+            expenses.setValue(dto.value());
+        }
+
+        if (dto.date() != null) {
+            expenses.setDate(dto.date());
+        }
+
+        return ExpensesMapper.toDto(expenses);
+    }
 }
