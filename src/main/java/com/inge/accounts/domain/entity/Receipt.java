@@ -1,20 +1,32 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "tb_receipt")
 public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
     private String description;
+
+    @Column(nullable = false)
     private double value;
+
+
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "category_id")
     private Category category;
+
+    @Column(nullable = false)
     private Date date;
 
     public Long getId() {
@@ -59,5 +71,8 @@ public class Receipt {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Receipt() {
     }
 }

@@ -1,9 +1,12 @@
-package com.inge.accounts.entity;
+package com.inge.accounts.domain.entity;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
+@Entity
+@Table(name = "tb_expenses")
 public class Expenses {
 
     @Id
@@ -12,27 +15,23 @@ public class Expenses {
 
     @Column(nullable = false, unique = true)
     private String name;
-    @Column
+
+    @Column(nullable = true)
     private String description;
 
-    @Column(nullable = false)
-    private double value;
-
-    @ManyToOne(fetch = FetchType.LAZY,
-                cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("category_id")
-    private Category category;
+    @Column(nullable = true)
+    private BigDecimal value;
 
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinCalumn("sub_category_id")
-    private SubCategory subCategory;
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false)
     private boolean payment;
 
-    @Column(nullable = false)
-    private Date date;
+    @Column(nullable = true)
+    private LocalDate date;
 
     public Long getId() {
         return id;
@@ -54,11 +53,11 @@ public class Expenses {
         this.description = description;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
@@ -70,14 +69,6 @@ public class Expenses {
         this.category = category;
     }
 
-    public SubCategory getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(SubCategory subCategory) {
-        this.subCategory = subCategory;
-    }
-
     public boolean isPayment() {
         return payment;
     }
@@ -86,11 +77,11 @@ public class Expenses {
         this.payment = payment;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 }
