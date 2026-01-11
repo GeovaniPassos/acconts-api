@@ -3,7 +3,7 @@ package com.inge.accounts.domain.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "tb_expenses")
@@ -31,7 +31,7 @@ public class Expenses {
     private boolean payment;
 
     @Column(nullable = true)
-    private Date date;
+    private LocalDate date;
 
     public Long getId() {
         return id;
@@ -77,11 +77,11 @@ public class Expenses {
         this.payment = payment;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 }

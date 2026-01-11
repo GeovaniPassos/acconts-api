@@ -3,7 +3,7 @@ package com.inge.accounts.domain.dto;
 import com.inge.accounts.domain.entity.Category;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 public record ExpensesPatchDto(
     String name,
@@ -11,5 +11,5 @@ public record ExpensesPatchDto(
     String categoryName,
     Boolean payment,
     BigDecimal value,
-    Date date
+    LocalDate date
 ) {}
