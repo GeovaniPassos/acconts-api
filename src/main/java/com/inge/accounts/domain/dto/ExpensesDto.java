@@ -1,7 +1,7 @@
 package com.inge.accounts.domain.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 public record ExpensesDto(Long id,
                           String name,
@@ -9,6 +9,6 @@ public record ExpensesDto(Long id,
                           String categoryName,
                           boolean payment,
                           BigDecimal value,
-                          Date date
+                          LocalDate date
 ) {
 }
