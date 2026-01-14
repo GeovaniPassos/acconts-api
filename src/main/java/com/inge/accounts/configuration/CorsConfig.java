@@ -15,7 +15,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://127.0.0.1:5500",
-                                "https://geovanipassos.github.io/acconts-painel"
+                                "https://geovanipassos.github.io"
                         )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                         .allowedHeaders("*")
