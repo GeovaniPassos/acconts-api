@@ -6,6 +6,8 @@ import com.inge.accounts.services.ExpensesService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -43,5 +45,15 @@ public class ExpensesController {
     @PatchMapping("/{id}")
     public ResponseEntity<ExpensesDto> patch(@PathVariable Long id, @RequestBody ExpensesPatchDto dto) {
         return ResponseEntity.ok(service.patch(id, dto));
+    }
+
+    @GetMapping("/by-period")
+    public ResponseEntity<List<ExpensesDto>> findByPeriod(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
+        return ResponseEntity.ok(service.findByPeriod(startDate, endDate));
+    }
+
+    @GetMapping("/by-month")
+    public ResponseEntity<List<ExpensesDto>> findByMonth(@RequestParam int year, @RequestParam int month) {
+        return ResponseEntity.ok(service.findByMonth(YearMonth.of(year, month)));
     }
 }
