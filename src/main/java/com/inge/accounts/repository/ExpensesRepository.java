@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
     List<Expenses> findByDateBetween(LocalDate startDate, LocalDate endDate);
+    List<Expenses> findByNameContainsIgnoreCase(String name);
 }
 
 
