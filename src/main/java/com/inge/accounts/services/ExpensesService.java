@@ -11,6 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -97,5 +99,28 @@ public class ExpensesService {
         }
 
         return ExpensesMapper.toDto(expenses);
+    }
+
+    @Transactional
+    public List<ExpensesDto> findByPeriod(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Data inicial não pode ser maior que a final.");
+        }
+
+        return expensesRepository.findByDateBetween(startDate, endDate)
+                .stream()
+                .map(ExpensesMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public List<ExpensesDto> findByMonth(YearMonth yearMonth) {
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        return expensesRepository.findByDateBetween(start, end)
+                .stream()
+                .map(ExpensesMapper::toDto)
+                .toList();
     }
 }
