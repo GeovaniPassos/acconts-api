@@ -123,4 +123,16 @@ public class ExpensesService {
                 .map(ExpensesMapper::toDto)
                 .toList();
     }
+
+    public List<ExpensesDto> findByName(String name) {
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("O nome não pode ser nulo na pesquisa!");
+        }
+
+        return expensesRepository.findByNameContainsIgnoreCase(name)
+                .stream()
+                .map(ExpensesMapper::toDto)
+                .toList();
+    }
 }

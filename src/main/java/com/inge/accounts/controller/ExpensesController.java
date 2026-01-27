@@ -56,4 +56,9 @@ public class ExpensesController {
     public ResponseEntity<List<ExpensesDto>> findByMonth(@RequestParam int year, @RequestParam int month) {
         return ResponseEntity.ok(service.findByMonth(YearMonth.of(year, month)));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ExpensesDto>> findByNameContainsIgnoreCase(@RequestParam String name) {
+        return ResponseEntity.ok(service.findByName(name));
+    }
 }
