@@ -9,6 +9,7 @@ public record ExpensesDto(Long id,
                           String categoryName,
                           boolean payment,
                           BigDecimal value,
+                          LocalDate paymentDate,
                           LocalDate date
 ) {
 }

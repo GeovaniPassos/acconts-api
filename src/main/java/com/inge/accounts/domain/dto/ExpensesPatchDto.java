@@ -11,5 +11,6 @@ public record ExpensesPatchDto(
     String categoryName,
     Boolean payment,
     BigDecimal value,
+    LocalDate paymentDate,
     LocalDate date
 ) {}

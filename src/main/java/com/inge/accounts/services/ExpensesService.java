@@ -88,6 +88,12 @@ public class ExpensesService {
 
         if (dto.payment() != null) {
             expenses.setPayment(dto.payment());
+            if (dto.payment()) {
+                expenses.setPaymentDate(LocalDate.now());
+            } else {
+                expenses.setPaymentDate(null);
+            }
+
         }
 
         if (dto.value() != null) {
@@ -99,6 +105,23 @@ public class ExpensesService {
         }
 
         return ExpensesMapper.toDto(expenses);
+    }
+
+    @Transactional
+    public ExpensesDto togglePayment(Long id) {
+        Expenses expense = expensesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
+
+        boolean newStatus = !expense.isPayment();
+        expense.setPayment(newStatus);
+
+        if (newStatus) {
+            expense.setPaymentDate(LocalDate.now());
+        } else {
+            expense.setPaymentDate(null);
+        }
+
+        return ExpensesMapper.toDto(expense);
     }
 
     @Transactional

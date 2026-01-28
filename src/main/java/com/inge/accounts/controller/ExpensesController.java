@@ -61,4 +61,9 @@ public class ExpensesController {
     public ResponseEntity<List<ExpensesDto>> findByNameContainsIgnoreCase(@RequestParam String name) {
         return ResponseEntity.ok(service.findByName(name));
     }
+
+    @PatchMapping("/{id}/toggle-payment")
+    public ResponseEntity<ExpensesDto> togglePayment(@PathVariable Long id) {
+        return ResponseEntity.ok(service.togglePayment(id));
+    }
 }
