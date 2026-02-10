@@ -30,7 +30,10 @@ public class Expenses {
     @Column(nullable = false)
     private boolean payment;
 
-    @Column(nullable = true)
+    @Column
+    private LocalDate paymentDate;
+
+    @Column
     private LocalDate date;
 
     public Long getId() {
@@ -76,6 +79,10 @@ public class Expenses {
     public void setPayment(boolean payment) {
         this.payment = payment;
     }
+
+    public LocalDate getPaymentDate() {return paymentDate;}
+
+    public void setPaymentDate(LocalDate paymentDate) {this.paymentDate = paymentDate;}
 
     public LocalDate getDate() {
         return date;

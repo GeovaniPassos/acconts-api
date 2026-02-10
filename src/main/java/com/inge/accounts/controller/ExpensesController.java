@@ -3,6 +3,7 @@ package com.inge.accounts.controller;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.services.ExpensesService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,5 +61,10 @@ public class ExpensesController {
     @GetMapping("/search")
     public ResponseEntity<List<ExpensesDto>> findByNameContainsIgnoreCase(@RequestParam String name) {
         return ResponseEntity.ok(service.findByName(name));
+    }
+
+    @PatchMapping("/{id}/toggle-payment")
+    public ResponseEntity<ExpensesDto> togglePayment(@PathVariable Long id) {
+        return ResponseEntity.ok(service.togglePayment(id));
     }
 }

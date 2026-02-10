@@ -15,9 +15,9 @@ public class ExpensesMapper {
         expenses.setName(dto.name());
         expenses.setDescription(dto.description());
         expenses.setCategory(category);
-
         expenses.setPayment(dto.payment());
         expenses.setValue(dto.value());
+        expenses.setPaymentDate(dto.paymentDate());
         expenses.setDate(dto.date());
 
         return expenses;
@@ -33,6 +33,7 @@ public class ExpensesMapper {
                 entity.getCategory().getName(),
                 entity.isPayment(),
                 entity.getValue(),
+                entity.getPaymentDate(),
                 entity.getDate()
         );
     }

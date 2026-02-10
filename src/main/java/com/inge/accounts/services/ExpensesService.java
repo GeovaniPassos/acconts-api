@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ExpensesService {
@@ -88,6 +89,12 @@ public class ExpensesService {
 
         if (dto.payment() != null) {
             expenses.setPayment(dto.payment());
+            expenses.setPaymentDate(dto.paymentDate());
+            if (dto.payment() && dto.paymentDate() == null) {
+                expenses.setPaymentDate(LocalDate.now());
+            } else {
+                expenses.setPaymentDate(null);
+            }
         }
 
         if (dto.value() != null) {
@@ -99,6 +106,23 @@ public class ExpensesService {
         }
 
         return ExpensesMapper.toDto(expenses);
+    }
+
+    @Transactional
+    public ExpensesDto togglePayment(Long id) {
+        Expenses expense = expensesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
+
+        boolean newStatus = !expense.isPayment();
+        expense.setPayment(newStatus);
+
+        if (newStatus) {
+            expense.setPaymentDate(LocalDate.now());
+        } else {
+            expense.setPaymentDate(null);
+        }
+
+        return ExpensesMapper.toDto(expense);
     }
 
     @Transactional
