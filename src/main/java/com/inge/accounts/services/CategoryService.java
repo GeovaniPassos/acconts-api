@@ -2,8 +2,6 @@ package com.inge.accounts.services;
 
 import com.inge.accounts.domain.dto.CategoryDto;
 import com.inge.accounts.domain.dto.CategoryPatchDto;
-import com.inge.accounts.domain.dto.ExpensesDto;
-import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.CategoryMapper;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -49,11 +48,9 @@ public class CategoryService {
     }
 
 
-    public CategoryDto findById(Long id) {
+    public Optional<CategoryDto> findById(Long id) {
         return categoryRepository.findById(id)
-                .map(CategoryMapper::toDto)
-                .orElseThrow(() ->
-                        new RuntimeException("Categoria não encontrada!"));
+                .map(CategoryMapper::toDto);
     }
 
     @Transactional

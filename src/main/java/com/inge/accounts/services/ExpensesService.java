@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class ExpensesService {
@@ -66,11 +63,9 @@ public class ExpensesService {
                 .toList();
     }
 
-    public ExpensesDto findById(Long id) {
+    public Optional<ExpensesDto> findById(Long id) {
         return expensesRepository.findById(id)
-                .map(ExpensesMapper::toDto)
-                .orElseThrow(() ->
-                        new RuntimeException("Despesa não encontrada!"));
+                .map(ExpensesMapper::toDto);
     }
 
     public void delete(Long id) {
@@ -124,14 +119,16 @@ public class ExpensesService {
     }
 
     @Transactional
-    public ExpensesDto togglePayment(Long id) {
+    public ExpensesDto togglePayment(Long id, LocalDate date) {
         Expenses expense = expensesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
         expense.setPayment(newStatus);
 
-        if (newStatus) {
+        if (newStatus && date != null) {
+            expense.setPaymentDate(date);
+        } else if (newStatus) {
             expense.setPaymentDate(LocalDate.now());
         } else {
             expense.setPaymentDate(null);
