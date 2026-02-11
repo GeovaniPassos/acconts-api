@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,18 +31,31 @@ public class ExpensesService {
     }
 
     @Transactional
-    public ExpensesDto createExpenses(ExpensesDto dto) {
+    public List<ExpensesDto> createExpenses(ExpensesDto dto) {
 
         Category category = categoryService.findByNameAndType(
                 dto.categoryName(),
                 TransactionType.EXPENSES);
 
-        Expenses expenses = ExpensesMapper.toEntity(dto, category);
+        List<ExpensesDto> expensesList = new ArrayList<>();
 
-        expenses = expensesRepository.save(expenses);
+        LocalDate baseDate = dto.date();
+        int total = dto.totalInstallments();
 
-        return ExpensesMapper.toDto(expenses);
+        for(int i = 1; i <= total ;i++) {
 
+            Expenses expense = ExpensesMapper.toEntity(dto, category);
+
+            expense.setInstallment(i);
+            expense.setTotalInstallments(total);
+
+            LocalDate installmentDate = baseDate.plusMonths(i - 1);
+            expense.setDate(installmentDate);
+
+            Expenses saved = expensesRepository.save(expense);
+            expensesList.add(ExpensesMapper.toDto(saved));
+        }
+        return expensesList;
     }
 
     @Transactional

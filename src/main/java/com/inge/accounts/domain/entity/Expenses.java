@@ -13,7 +13,7 @@ public class Expenses {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = true)
@@ -26,6 +26,12 @@ public class Expenses {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @Column(nullable = false)
+    private int installment;
+
+    @Column(nullable = false)
+    private int totalInstallments;
 
     @Column(nullable = false)
     private boolean payment;
@@ -71,6 +77,14 @@ public class Expenses {
     public void setCategory(Category category) {
         this.category = category;
     }
+
+    public int getInstallment() { return installment; }
+
+    public void setInstallment(int installment) { this.installment = installment; }
+
+    public int getTotalInstallments() { return totalInstallments; }
+
+    public void setTotalInstallments(int totalInstallments) { this.totalInstallments = totalInstallments;}
 
     public boolean isPayment() {
         return payment;

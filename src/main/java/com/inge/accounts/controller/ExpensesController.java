@@ -22,8 +22,8 @@ public class ExpensesController {
     }
 
     @PostMapping
-    public ResponseEntity<ExpensesDto> create(@RequestBody ExpensesDto dto) {
-        ExpensesDto result = service.createExpenses(dto);
+    public ResponseEntity<List<ExpensesDto>> create(@RequestBody ExpensesDto dto) {
+        List<ExpensesDto> result = service.createExpenses(dto);
         return ResponseEntity.ok(result);
     }
 
