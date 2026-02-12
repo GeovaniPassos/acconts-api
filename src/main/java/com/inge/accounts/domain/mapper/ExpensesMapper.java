@@ -4,6 +4,8 @@ import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
 
+import java.math.BigDecimal;
+
 public class ExpensesMapper {
     
     private ExpensesMapper() {}
@@ -40,5 +42,21 @@ public class ExpensesMapper {
                 entity.getPaymentDate(),
                 entity.getDate()
         );
+    }
+
+    public static Expenses copyExpensesAddInstallments(Expenses expenses, int newTotalInstallments) {
+        Expenses newExpenses = new Expenses();
+
+        newExpenses.setName(expenses.getName());
+        newExpenses.setDescription(expenses.getDescription());
+        newExpenses.setCategory(expenses.getCategory());
+        newExpenses.setInstallment(expenses.getInstallment());
+        newExpenses.setTotalInstallments(newTotalInstallments);
+        newExpenses.setValue(BigDecimal.valueOf(0));
+        newExpenses.setPayment(false);
+        newExpenses.setPaymentDate(null);
+        newExpenses.setDate(expenses.getDate());
+
+        return  newExpenses;
     }
 }

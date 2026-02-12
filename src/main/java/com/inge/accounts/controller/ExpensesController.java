@@ -1,5 +1,6 @@
 package com.inge.accounts.controller;
 
+import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.response.ApiResponse;
@@ -26,6 +27,13 @@ public class ExpensesController {
     public ResponseEntity<ApiResponse<List<ExpensesDto>>> create(@RequestBody ExpensesDto dto) {
         List<ExpensesDto> result = service.createExpenses(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Despesa criada com sucesso" ,result));
+    }
+
+    @PostMapping("/addInstallments")
+    public ResponseEntity<ApiResponse<List<ExpensesDto>>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
+        List<ExpensesDto> result = service.addInstallments(dto);
+
+        return ResponseEntity.ok(ApiResponse.success("Parcela(s) da(s) despesa atualizada com sucesso", result));
     }
 
     @GetMapping

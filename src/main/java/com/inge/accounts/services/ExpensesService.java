@@ -1,5 +1,6 @@
 package com.inge.accounts.services;
 
+import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.domain.entity.Category;
@@ -11,9 +12,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExpensesService {
@@ -52,6 +55,36 @@ public class ExpensesService {
             Expenses saved = expensesRepository.save(expense);
             expensesList.add(ExpensesMapper.toDto(saved));
         }
+        return expensesList;
+    }
+
+    @Transactional
+    public List<ExpensesDto> addInstallments(ExpensesAddInstallmentsDto dto) {
+
+        List<Expenses> expenses = expensesRepository.findByName(dto.name());
+
+        Expenses lastExpense =  expenses.stream()
+                .max(Comparator.comparing(Expenses::getInstallment))
+                .orElseThrow(() -> new RuntimeException("Despensa não encontrada"));
+
+        LocalDate lastDate = lastExpense.getDate();
+        int newTotalInstallments = lastExpense.getTotalInstallments() + dto.installments();
+
+        expenses.forEach(exp -> exp.setTotalInstallments(newTotalInstallments));
+
+        List<ExpensesDto> expensesList = new ArrayList<>();
+
+        for(int i = 1; i <= dto.installments(); i++){
+            Expenses newExpense = ExpensesMapper.copyExpensesAddInstallments(lastExpense, newTotalInstallments);
+
+            newExpense.setInstallment(lastExpense.getInstallment() + i);
+            if (dto.value() != null) newExpense.setValue(dto.value());
+            newExpense.setDate(lastDate.plusMonths(i));
+
+            Expenses saved = expensesRepository.save(newExpense);
+            expensesList.add(ExpensesMapper.toDto(saved));
+        }
+
         return expensesList;
     }
 
