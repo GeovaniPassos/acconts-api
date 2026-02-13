@@ -2,6 +2,7 @@ package com.inge.accounts.controller;
 
 import com.inge.accounts.domain.dto.CategoryDto;
 import com.inge.accounts.domain.dto.CategoryPatchDto;
+import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,36 +23,52 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto dto) {
+    public ResponseEntity<ApiResponse<CategoryDto>> create(@RequestBody CategoryDto dto) {
         CategoryDto result = service.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Categoria criada com sucesso" ,result));
     }
 
     @GetMapping
-    public  ResponseEntity<List<CategoryDto>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public  ResponseEntity<ApiResponse<List<CategoryDto>>> findAll() {
+
+        List<CategoryDto> list = service.findAll();
+
+        if (list.isEmpty()) {
+            return ResponseEntity.ok(
+                    ApiResponse.empty("Nunhuma categoria encontrada com o filtro informado"));
+        }
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Resultado da busca", list));
     }
 
     @GetMapping("/{id}")
-    public CategoryDto findById(@PathVariable Long id) {
-        return service.findById(id);
+    public ResponseEntity<ApiResponse<CategoryDto>> findById(@PathVariable Long id) {
+
+        return service.findById(id)
+                .map(dto -> ResponseEntity.ok(ApiResponse.success("Categoria encontrada", dto)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("Categoria não encontrada")));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Categoria removida com sucesso", null));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
+    public ResponseEntity<ApiResponse<CategoryDto>> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
         CategoryDto updated = service.update(id, dto);
 
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso" ,updated));
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<CategoryDto> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
-        return ResponseEntity.ok(service.patch(id, dto));
+    public  ResponseEntity<ApiResponse<CategoryDto>> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
+        CategoryDto patch = service.patch(id, dto);
+
+        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso", patch));
     }
 }
