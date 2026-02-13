@@ -1,5 +1,6 @@
 package com.inge.accounts.domain.mapper;
 
+import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
@@ -58,5 +59,17 @@ public class ExpensesMapper {
         newExpenses.setDate(expenses.getDate());
 
         return  newExpenses;
+    }
+
+    public static ExpensesAddInstallmentsDto toAddInstallmentsDto(ExpensesDto expensesDto) {
+        if (expensesDto == null) return null;
+
+        return new ExpensesAddInstallmentsDto(
+                expensesDto.name(),
+                expensesDto.categoryName(),
+                expensesDto.totalInstallments(),
+                expensesDto.value()
+        );
+
     }
 }

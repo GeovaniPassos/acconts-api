@@ -18,6 +18,8 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.inge.accounts.domain.mapper.ExpensesMapper.toAddInstallmentsDto;
+
 @Service
 public class ExpensesService {
 
@@ -32,6 +34,10 @@ public class ExpensesService {
 
     @Transactional
     public List<ExpensesDto> createExpenses(ExpensesDto dto) {
+
+        if (!expensesRepository.findByName(dto.name()).isEmpty()) {
+            return addInstallments(toAddInstallmentsDto(dto));
+        }
 
         Category category = categoryService.findByNameAndType(
                 dto.categoryName(),
@@ -152,16 +158,14 @@ public class ExpensesService {
     }
 
     @Transactional
-    public ExpensesDto togglePayment(Long id, LocalDate date) {
+    public ExpensesDto togglePayment(Long id) {
         Expenses expense = expensesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
         expense.setPayment(newStatus);
 
-        if (newStatus && date != null) {
-            expense.setPaymentDate(date);
-        } else if (newStatus) {
+        if (newStatus) {
             expense.setPaymentDate(LocalDate.now());
         } else {
             expense.setPaymentDate(null);

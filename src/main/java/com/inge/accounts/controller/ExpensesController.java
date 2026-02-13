@@ -59,7 +59,7 @@ public class ExpensesController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Depsesa removida com sucesso",null));
+        return ResponseEntity.ok(ApiResponse.success("Despesa removida com sucesso",null));
     }
 
     @PatchMapping("/{id}")
@@ -103,8 +103,8 @@ public class ExpensesController {
     }
 
     @PatchMapping("/{id}/toggle-payment")
-    public ResponseEntity<ApiResponse<ExpensesDto>> togglePayment(@PathVariable Long id,@RequestParam LocalDate date) {
-        ExpensesDto dto = service.togglePayment(id, date);
+    public ResponseEntity<ApiResponse<ExpensesDto>> togglePayment(@PathVariable Long id) {
+        ExpensesDto dto = service.togglePayment(id);
         return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado", dto));
     }
 }
