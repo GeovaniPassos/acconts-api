@@ -13,7 +13,7 @@ public class Expenses {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = true)
@@ -28,9 +28,18 @@ public class Expenses {
     private Category category;
 
     @Column(nullable = false)
+    private int installment;
+
+    @Column(nullable = false)
+    private int totalInstallments;
+
+    @Column(nullable = false)
     private boolean payment;
 
-    @Column(nullable = true)
+    @Column
+    private LocalDate paymentDate;
+
+    @Column
     private LocalDate date;
 
     public Long getId() {
@@ -69,6 +78,14 @@ public class Expenses {
         this.category = category;
     }
 
+    public int getInstallment() { return installment; }
+
+    public void setInstallment(int installment) { this.installment = installment; }
+
+    public int getTotalInstallments() { return totalInstallments; }
+
+    public void setTotalInstallments(int totalInstallments) { this.totalInstallments = totalInstallments;}
+
     public boolean isPayment() {
         return payment;
     }
@@ -76,6 +93,10 @@ public class Expenses {
     public void setPayment(boolean payment) {
         this.payment = payment;
     }
+
+    public LocalDate getPaymentDate() {return paymentDate;}
+
+    public void setPaymentDate(LocalDate paymentDate) {this.paymentDate = paymentDate;}
 
     public LocalDate getDate() {
         return date;

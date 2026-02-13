@@ -9,7 +9,10 @@ public record ExpensesPatchDto(
     String name,
     String description,
     String categoryName,
+    int installment,
+    int totalInstallments,
     Boolean payment,
     BigDecimal value,
+    LocalDate paymentDate,
     LocalDate date
 ) {}
