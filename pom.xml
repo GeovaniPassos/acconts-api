@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.inge</groupId>
-	<artifactId>Accounts</artifactId>
+	<artifactId>accounts-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Accounts</name>
 	<description>Demo project for Spring Boot</description>
