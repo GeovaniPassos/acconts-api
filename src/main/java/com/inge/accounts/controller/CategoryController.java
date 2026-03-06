@@ -23,10 +23,10 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryDto>> create(@RequestBody CategoryDto dto) {
+    public ResponseEntity<ApiResponse<Void>> create(@RequestBody CategoryDto dto) {
         CategoryDto result = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.success("Categoria criada com sucesso" ,result));
+                ApiResponse.success("Categoria criada com sucesso"));
     }
 
     @GetMapping
@@ -55,20 +55,20 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Categoria removida com sucesso", null));
+        return ResponseEntity.ok(ApiResponse.success("Categoria removida com sucesso"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryDto>> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
+    public ResponseEntity<ApiResponse<Void>> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
         CategoryDto updated = service.update(id, dto);
 
-        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso" ,updated));
+        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<ApiResponse<CategoryDto>> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
+    public  ResponseEntity<ApiResponse<Void>> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
         CategoryDto patch = service.patch(id, dto);
 
-        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso", patch));
+        return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
     }
 }

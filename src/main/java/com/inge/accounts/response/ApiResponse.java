@@ -1,9 +1,12 @@
 package com.inge.accounts.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class ApiResponse<T> {
 
     private boolean success;
     private String message;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;
 
     public ApiResponse(boolean success, String message, T data) {
