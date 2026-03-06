@@ -12,8 +12,17 @@ public class ApiResponse<T> {
         this.data = data;
     }
 
+    public ApiResponse(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+    }
+
     public static <T> ApiResponse<T> success(String message, T data) {
         return new ApiResponse<>(true, message, data);
+    }
+
+    public static ApiResponse<Void> success(String message) {
+        return new ApiResponse<>(true, message);
     }
 
     public static <T> ApiResponse<T> empty(String message) {

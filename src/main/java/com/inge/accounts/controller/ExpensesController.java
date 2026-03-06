@@ -24,16 +24,16 @@ public class ExpensesController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> create(@RequestBody ExpensesDto dto) {
-        List<ExpensesDto> result = service.createExpenses(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Despesa criada com sucesso" ,result));
+    public ResponseEntity<ApiResponse<Void>> create(@RequestBody ExpensesDto dto) {
+        service.createExpenses(dto);
+        System.out.println(ApiResponse.success("Despesa criada com sucesso"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Despesa criada com sucesso"));
     }
 
     @PostMapping("/addInstallments")
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
-        List<ExpensesDto> result = service.addInstallments(dto);
-
-        return ResponseEntity.ok(ApiResponse.success("Parcela(s) da(s) despesa atualizada com sucesso", result));
+    public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
+        service.addInstallments(dto);
+        return ResponseEntity.ok(ApiResponse.success("Parcela(s) da(s) despesa atualizada com sucesso"));
     }
 
     @GetMapping
@@ -59,14 +59,14 @@ public class ExpensesController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Despesa removida com sucesso",null));
+        return ResponseEntity.ok(ApiResponse.success("Despesa removida com sucesso"));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<ExpensesDto>> patch(@PathVariable Long id, @RequestBody ExpensesPatchDto dto) {
-        ExpensesDto patch = service.patch(id, dto);
+    public ResponseEntity<ApiResponse<Void>> patch(@PathVariable Long id, @RequestBody ExpensesPatchDto dto) {
+        service.patch(id, dto);
 
-        return ResponseEntity.ok(ApiResponse.success("Despesa atualizada com sucesso", patch));
+        return ResponseEntity.ok(ApiResponse.success("Despesa atualizada com sucesso"));
     }
 
     @GetMapping("/by-period")
@@ -103,8 +103,8 @@ public class ExpensesController {
     }
 
     @PatchMapping("/{id}/toggle-payment")
-    public ResponseEntity<ApiResponse<ExpensesDto>> togglePayment(@PathVariable Long id) {
-        ExpensesDto dto = service.togglePayment(id);
-        return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado", dto));
+    public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable Long id) {
+        service.togglePayment(id);
+        return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado"));
     }
 }
