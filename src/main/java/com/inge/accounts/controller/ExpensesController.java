@@ -26,14 +26,15 @@ public class ExpensesController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> create(@RequestBody ExpensesDto dto) {
         service.createExpenses(dto);
-        System.out.println(ApiResponse.success("Despesa criada com sucesso"));
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Despesa criada com sucesso"));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Despesa criada com sucesso"));
     }
 
     @PostMapping("/addInstallments")
     public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
         service.addInstallments(dto);
-        return ResponseEntity.ok(ApiResponse.success("Parcela(s) da(s) despesa atualizada com sucesso"));
+        return ResponseEntity.ok(ApiResponse
+                .success("Parcela(s) da(s) despesa atualizada com sucesso"));
     }
 
     @GetMapping

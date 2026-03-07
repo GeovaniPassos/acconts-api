@@ -36,16 +36,18 @@ public class GlobalExceptionHandlers {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errors.put(error.getField(), error.getDefaultMessage());
         });
 
-        String messages = errors.toString();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.error("Erro de validação dos campos: " + messages));
+        ApiResponse<Map<String, String>> response =
+                ApiResponse.error("Erro de validação dos campos: ", errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
     }
 
 }

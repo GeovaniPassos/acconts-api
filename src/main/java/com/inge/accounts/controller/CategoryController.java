@@ -30,8 +30,8 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody CategoryDto dto) {
         service.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.success("Categoria criada com sucesso"));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Categoria criada com sucesso"));
     }
 
     @GetMapping
