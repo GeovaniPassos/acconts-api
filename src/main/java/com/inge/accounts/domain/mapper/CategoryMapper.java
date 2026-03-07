@@ -1,6 +1,7 @@
 package com.inge.accounts.domain.mapper;
 
 import com.inge.accounts.domain.dto.CategoryDto;
+import com.inge.accounts.domain.dto.CategoryPatchDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.enums.TransactionType;
 
@@ -31,5 +32,14 @@ public class CategoryMapper {
     public static void updateEntity(Category entity, CategoryDto dto) {
         entity.setName(dto.name());
         entity.setType(TransactionType.valueOf(dto.type()));
+    }
+
+    public static void copyNonNullProperties(Category entity, CategoryPatchDto dto) {
+        if (dto.name() != null) {
+            entity.setName(dto.name());
+        }
+        if (dto.type() != null) {
+            entity.setType(TransactionType.valueOf(dto.type()));
+        }
     }
 }
