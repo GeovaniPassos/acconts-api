@@ -7,7 +7,9 @@ import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.ExpensesMapper;
+import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
+import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -33,17 +35,15 @@ public class ExpensesService {
     }
 
     @Transactional
-    public List<ExpensesDto> createExpenses(ExpensesDto dto) {
+    public void createExpenses(ExpensesDto dto) {
 
         if (!expensesRepository.findByName(dto.name()).isEmpty()) {
-            return addInstallments(toAddInstallmentsDto(dto));
+            addInstallments(toAddInstallmentsDto(dto));
         }
 
         Category category = categoryService.findByNameAndType(
                 dto.categoryName(),
                 TransactionType.EXPENSES);
-
-        List<ExpensesDto> expensesList = new ArrayList<>();
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
@@ -58,14 +58,12 @@ public class ExpensesService {
             LocalDate installmentDate = baseDate.plusMonths(i - 1);
             expense.setDate(installmentDate);
 
-            Expenses saved = expensesRepository.save(expense);
-            expensesList.add(ExpensesMapper.toDto(saved));
+            expensesRepository.save(expense);
         }
-        return expensesList;
     }
 
     @Transactional
-    public List<ExpensesDto> addInstallments(ExpensesAddInstallmentsDto dto) {
+    public void addInstallments(ExpensesAddInstallmentsDto dto) {
 
         List<Expenses> expenses = expensesRepository.findByName(dto.name());
 
@@ -78,8 +76,6 @@ public class ExpensesService {
 
         expenses.forEach(exp -> exp.setTotalInstallments(newTotalInstallments));
 
-        List<ExpensesDto> expensesList = new ArrayList<>();
-
         for(int i = 1; i <= dto.installments(); i++){
             Expenses newExpense = ExpensesMapper.copyExpensesAddInstallments(lastExpense, newTotalInstallments);
 
@@ -87,30 +83,39 @@ public class ExpensesService {
             if (dto.value() != null) newExpense.setValue(dto.value());
             newExpense.setDate(lastDate.plusMonths(i));
 
-            Expenses saved = expensesRepository.save(newExpense);
-            expensesList.add(ExpensesMapper.toDto(saved));
+            expensesRepository.save(newExpense);
         }
-
-        return expensesList;
     }
 
     @Transactional
     public List<ExpensesDto> findAll() {
-        return expensesRepository.findAll()
+        List<ExpensesDto> list = expensesRepository.findAll()
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
+
+        if (list.isEmpty()) {
+            throw new BusinessException("Nenhuma despesa encontrada.");
+        }
+
+        return list;
     }
 
-    public Optional<ExpensesDto> findById(Long id) {
+    public ExpensesDto findById(Long id) {
+
+        if (id == null) {
+            throw new BusinessException("O id não pode ser nulo.");
+        }
+
         return expensesRepository.findById(id)
-                .map(ExpensesMapper::toDto);
+                .map(ExpensesMapper::toDto).orElseThrow(() ->
+                        new BusinessException("Despesa não encontrada com o id: " + id));
     }
 
     public void delete(Long id) {
         Expenses expenses = expensesRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Categoria não encontrada!"));
+                        new RuntimeException("Despesa não encontrada!"));
         expensesRepository.delete(expenses);
     }
 

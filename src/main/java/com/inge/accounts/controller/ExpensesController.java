@@ -3,10 +3,12 @@ package com.inge.accounts.controller;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
+import com.inge.accounts.domain.validations.OnCreate;
 import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.ExpensesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,14 +26,14 @@ public class ExpensesController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> create(@RequestBody ExpensesDto dto) {
+    public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody ExpensesDto dto) {
         service.createExpenses(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Despesa criada com sucesso"));
     }
 
     @PostMapping("/addInstallments")
-    public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
+    public ResponseEntity<ApiResponse<Void>> addInstallments( @RequestBody ExpensesAddInstallmentsDto dto) {
         service.addInstallments(dto);
         return ResponseEntity.ok(ApiResponse
                 .success("Parcela(s) da(s) despesa atualizada com sucesso"));
@@ -51,10 +53,11 @@ public class ExpensesController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ExpensesDto>> findById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(dto -> ResponseEntity.ok(ApiResponse.success("Despesa encontrada", dto)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Despesa não encontrada")));
+
+        ExpensesDto expense = service.findById(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Resultado da busca: ", expense));
     }
 
     @DeleteMapping("/{id}")
