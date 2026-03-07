@@ -5,7 +5,9 @@ import com.inge.accounts.domain.dto.CategoryPatchDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.enums.TransactionType;
 import com.inge.accounts.domain.mapper.CategoryMapper;
+import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.CategoryRepository;
+import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +24,25 @@ public class CategoryService {
     private CategoryDto dto;
 
     @Transactional
-    public CategoryDto create(CategoryDto dto) {
+    public void create(CategoryDto dto) {
+        if (StringUtils.isNullOrBlank(dto.name())) {
+            throw new BusinessException("O nome está vazio");
+        }
+
+        if (StringUtils.isNullOrBlank(dto.type())) {
+            throw new BusinessException("O tipo está vazio");
+        }
+
         TransactionType type = TransactionType.fromString(dto.type());
 
         if (categoryRepository.existsByNameAndType(dto.name(), type)) {
-            throw new RuntimeException("Categoria já existe com o ID: " + categoryRepository.getReferenceById(dto.id()));
+            Category cat = categoryRepository.findByNameAndType(dto.name(), type);
+            throw new BusinessException("Categoria já existe com o id: "
+                    + cat.getId());
         }
 
-        Category category =  CategoryMapper.toEntity(dto);
-        category = categoryRepository.save(category);
-
-        return CategoryMapper.toDto(category);
+        Category category = CategoryMapper.toEntity(dto);
+        categoryRepository.save(category);
 
     }
 
