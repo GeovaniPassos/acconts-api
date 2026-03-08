@@ -10,15 +10,12 @@ import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
 import com.inge.accounts.utils.StringUtils;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.inge.accounts.domain.mapper.ExpensesMapper.toAddInstallmentsDto;
 
@@ -62,6 +59,7 @@ public class ExpensesService {
         }
     }
 
+    //TODO: Ajustar a validação no valor para bigdecimal
     @Transactional
     public void addInstallments(ExpensesAddInstallmentsDto dto) {
 
@@ -69,7 +67,7 @@ public class ExpensesService {
 
         Expenses lastExpense =  expenses.stream()
                 .max(Comparator.comparing(Expenses::getInstallment))
-                .orElseThrow(() -> new RuntimeException("Despensa não encontrada"));
+                .orElseThrow(() -> new BusinessException("Despensa não encontrada"));
 
         LocalDate lastDate = lastExpense.getDate();
         int newTotalInstallments = lastExpense.getTotalInstallments() + dto.installments();
@@ -87,7 +85,7 @@ public class ExpensesService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ExpensesDto> findAll() {
         List<ExpensesDto> list = expensesRepository.findAll()
                 .stream()
@@ -95,12 +93,13 @@ public class ExpensesService {
                 .toList();
 
         if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada.");
+            throw new BusinessException("A lista de despesas está vazia.");
         }
 
         return list;
     }
 
+    @Transactional(readOnly = true)
     public ExpensesDto findById(Long id) {
 
         if (id == null) {
@@ -112,20 +111,23 @@ public class ExpensesService {
                         new BusinessException("Despesa não encontrada com o id: " + id));
     }
 
+    @Transactional
     public void delete(Long id) {
         Expenses expenses = expensesRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Despesa não encontrada!"));
+                        new BusinessException("Despesa não encontrada!"));
         expensesRepository.delete(expenses);
     }
 
     @Transactional
-    public ExpensesDto patch(Long id, ExpensesPatchDto dto) {
+    public void patch(Long id, ExpensesPatchDto dto) {
+        if (id == null) {
+            throw new BusinessException("O id não pode ser nulo.");
+        }
 
         Expenses expenses = expensesRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Despesa não encontrada com id: " + id
-                ));
+                .orElseThrow(() -> new BusinessException(
+                        "Despesa não encontrada para edição."));
 
         if (dto.name() != null) {
             expenses.setName(dto.name());
@@ -159,13 +161,17 @@ public class ExpensesService {
             expenses.setDate(dto.date());
         }
 
-        return ExpensesMapper.toDto(expenses);
+        ExpensesMapper.toDto(expenses);
     }
 
     @Transactional
-    public ExpensesDto togglePayment(Long id) {
+    public void togglePayment(Long id) {
+        if (id == null) {
+            throw new BusinessException("Id não pode ser nulo.");
+        }
+
         Expenses expense = expensesRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
+                .orElseThrow(() -> new BusinessException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
         expense.setPayment(newStatus);
@@ -176,41 +182,59 @@ public class ExpensesService {
             expense.setPaymentDate(null);
         }
 
-        return ExpensesMapper.toDto(expense);
+        ExpensesMapper.toDto(expense);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ExpensesDto> findByPeriod(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Data inicial não pode ser maior que a final.");
+            throw new BusinessException("Data inicial não pode ser maior que a final.");
         }
 
-        return expensesRepository.findByDateBetween(startDate, endDate)
+        List<ExpensesDto> list = expensesRepository.findByDateBetween(startDate, endDate)
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
+
+        if (list.isEmpty()) {
+            throw new BusinessException("Nenhuma despesa encontrada no periodo");
+        }
+
+        return list;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ExpensesDto> findByMonth(YearMonth yearMonth) {
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
 
-        return expensesRepository.findByDateBetween(start, end)
+        List<ExpensesDto> list = expensesRepository.findByDateBetween(start, end)
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
-    }
 
-    public List<ExpensesDto> findByName(String name) {
-
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("O nome não pode ser nulo na pesquisa!");
+        if (list.isEmpty()) {
+            throw new BusinessException("Nenhuma despesa encontrada no periodo.");
         }
 
-        return expensesRepository.findByNameContainsIgnoreCase(name)
+        return list;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExpensesDto> findByName(String name) {
+        if (StringUtils.isNullOrBlank(name)) {
+            throw new BusinessException("O nome não pode ser nulo na pesquisa!");
+        }
+
+        List<ExpensesDto> list = expensesRepository.findByNameContainsIgnoreCase(name)
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
+
+        if (list.isEmpty()) {
+            throw new BusinessException("Nenhuma despesa encontrada com o nome.");
+        }
+
+        return list;
     }
 }

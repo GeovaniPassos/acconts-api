@@ -4,6 +4,7 @@ import com.inge.accounts.response.ApiResponse;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -48,6 +49,19 @@ public class GlobalExceptionHandlers {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidFormat(HttpMessageNotReadableException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        String message = "Erro na leitura do arquivo JSON: Campos inválidos.";
+
+        if (ex.getMessage() != null && ex.getMessage().contains("Cannot deserialize")) {
+            message = "Um o mais campos possuem tipos de dados inválidos.";
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(message));
     }
 
 }

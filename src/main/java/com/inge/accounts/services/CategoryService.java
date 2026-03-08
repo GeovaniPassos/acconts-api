@@ -9,12 +9,11 @@ import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.CategoryRepository;
 import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -39,6 +38,7 @@ public class CategoryService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<CategoryDto> findAll() {
 
         List<CategoryDto> list = categoryRepository.findAll()
@@ -53,6 +53,7 @@ public class CategoryService {
         return list;
     }
 
+    @Transactional(readOnly = true)
     public Category findByNameAndType(String name, TransactionType type) {
 
         if (StringUtils.isNullOrBlank(name)) {
@@ -66,7 +67,7 @@ public class CategoryService {
         return categoryRepository.findByNameAndType(name, type);
     }
 
-
+    @Transactional(readOnly = true)
     public CategoryDto findById(Long id) {
 
         if (id == null) {
