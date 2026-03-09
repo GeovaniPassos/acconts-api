@@ -1,5 +1,6 @@
 package com.inge.accounts.controller;
 
+import com.inge.accounts.domain.dto.ExpenseSearchResponse;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
@@ -91,5 +92,16 @@ public class ExpensesController {
     public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable @NotNull Long id) {
         service.togglePayment(id);
         return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado"));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ExpenseSearchResponse>> findExpenses(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String name) {
+
+        ExpenseSearchResponse response = service.findExpenses(startDate, endDate, name);
+
+        return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }
 }

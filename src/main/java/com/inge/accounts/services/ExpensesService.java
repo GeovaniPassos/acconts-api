@@ -1,5 +1,6 @@
 package com.inge.accounts.services;
 
+import com.inge.accounts.domain.dto.ExpenseSearchResponse;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
@@ -13,6 +14,7 @@ import com.inge.accounts.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -236,5 +238,12 @@ public class ExpensesService {
         }
 
         return list;
+    }
+
+    public ExpenseSearchResponse findExpenses(LocalDate startDate, LocalDate endDate, String name) {
+
+        List<Expenses> expenses = expensesRepository.findExpenses(startDate, endDate, name);
+        BigDecimal total = expensesRepository.sumTotalValue(startDate, endDate, name);
+
     }
 }
