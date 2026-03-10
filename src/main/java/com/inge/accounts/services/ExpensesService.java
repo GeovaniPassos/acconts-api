@@ -1,6 +1,6 @@
 package com.inge.accounts.services;
 
-import com.inge.accounts.domain.dto.ExpenseSearchResponse;
+import com.inge.accounts.domain.dto.ExpenseSearchResponseDto;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
@@ -240,10 +240,21 @@ public class ExpensesService {
         return list;
     }
 
-    public ExpenseSearchResponse findExpenses(LocalDate startDate, LocalDate endDate, String name) {
+    public ExpenseSearchResponseDto findExpenses(LocalDate startDate, LocalDate endDate, String name) {
 
-        List<Expenses> expenses = expensesRepository.findExpenses(startDate, endDate, name);
-        BigDecimal total = expensesRepository.sumTotalValue(startDate, endDate, name);
+        List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name)
+                .stream()
+                .map(ExpensesMapper::toDto)
+                .toList();
 
+        if (list.isEmpty()) {
+            throw new BusinessException("Nunhuma despesa encontrada!");
+        }
+
+        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
+
+        return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }
 }

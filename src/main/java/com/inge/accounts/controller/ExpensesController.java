@@ -1,11 +1,10 @@
 package com.inge.accounts.controller;
 
-import com.inge.accounts.domain.dto.ExpenseSearchResponse;
+import com.inge.accounts.domain.dto.ExpenseSearchResponseDto;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
 import com.inge.accounts.domain.validations.OnCreate;
-import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.ExpensesService;
 import jakarta.validation.constraints.NotNull;
@@ -95,12 +94,12 @@ public class ExpensesController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ExpenseSearchResponse>> findExpenses(
+    public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) String name) {
 
-        ExpenseSearchResponse response = service.findExpenses(startDate, endDate, name);
+        ExpenseSearchResponseDto response = service.findExpenses(startDate, endDate, name);
 
         return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }
