@@ -20,7 +20,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             FROM Expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR e.name = :name)
+            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
+            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
             ORDER BY e.name
             """)
     List<Expenses> findExpenses(LocalDate startDate, LocalDate endDate, String name);
@@ -31,7 +32,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             FROM Expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR e.name = :name)
+            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
+            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
             """)
     BigDecimal sumValueTotalExpenses(LocalDate startDate, LocalDate endDate, String name);
 
@@ -41,7 +43,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             FROM Expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR e.name = :name)
+            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
+            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
             AND e.payment = true
             """)
     BigDecimal sumValueTotalPaidExpenses(LocalDate startDate, LocalDate endDate, String name);
@@ -52,7 +55,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             FROM Expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR e.name = :name)
+            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
+            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
             AND e.payment = false
             """)
     BigDecimal sumValueTotalUnpaidExpenses(LocalDate startDate, LocalDate endDate, String name);
