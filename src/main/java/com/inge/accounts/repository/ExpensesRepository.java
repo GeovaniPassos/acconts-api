@@ -18,8 +18,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
     @Query("""
             SELECT e
             FROM Expenses e
-            WHERE (:startDate IS NULL OR e.date >= :startDate)
-            AND (:endDate IS NULL OR e.date <= :endDate)
+            WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
+            AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
             AND (:name IS NULL OR e.name = :name)
             ORDER BY e.name
             """)
@@ -29,8 +29,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             SELECT
                 COALESCE(SUM(e.value), 0)
             FROM Expenses e
-            WHERE (:startDate IS NULL OR e.date >= :startDate)
-            AND (:endDate IS NULL OR e.date <= :endDate)
+            WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
+            AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
             AND (:name IS NULL OR e.name = :name)
             """)
     BigDecimal sumValueTotalExpenses(LocalDate startDate, LocalDate endDate, String name);
@@ -39,8 +39,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             SELECT
                 COALESCE(SUM(e.value), 0)
             FROM Expenses e
-            WHERE (:startDate IS NULL OR e.date >= :startDate)
-            AND (:endDate IS NULL OR e.date <= :endDate)
+            WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
+            AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
             AND (:name IS NULL OR e.name = :name)
             AND e.payment = true
             """)
@@ -50,8 +50,8 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             SELECT
                 COALESCE(SUM(e.value), 0)
             FROM Expenses e
-            WHERE (:startDate IS NULL OR e.date >= :startDate)
-            AND (:endDate IS NULL OR e.date <= :endDate)
+            WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
+            AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
             AND (:name IS NULL OR e.name = :name)
             AND e.payment = false
             """)

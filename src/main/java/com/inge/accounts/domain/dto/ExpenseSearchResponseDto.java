@@ -15,4 +15,20 @@ public class ExpenseSearchResponseDto {
         this.totalPaid = totalPaid;
         this.totalUnpaid = totalUnpaid;
     }
+
+    public List<ExpensesDto> getExpenses() {
+        return expenses;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public BigDecimal getTotalPaid() {
+        return totalPaid;
+    }
+
+    public BigDecimal getTotalUnpaid() {
+        return totalUnpaid;
+    }
 }

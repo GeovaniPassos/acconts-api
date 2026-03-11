@@ -88,7 +88,7 @@ public class ExpensesService {
     }
 
     @Transactional(readOnly = true)
-    public List<ExpensesDto> findAll() {
+    public ExpenseSearchResponseDto findAll() {
         List<ExpensesDto> list = expensesRepository.findAll()
                 .stream()
                 .map(ExpensesMapper::toDto)
@@ -98,7 +98,15 @@ public class ExpensesService {
             throw new BusinessException("A lista de despesas está vazia.");
         }
 
-        return list;
+        LocalDate startDate = null;
+        LocalDate endDate = null;
+        String name = null;
+
+        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
+
+        return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }
 
     @Transactional(readOnly = true)
@@ -240,6 +248,7 @@ public class ExpensesService {
         return list;
     }
 
+    //TODO: Tratar o nome se receber apenas uma parte, e ignorar maiusculas e acentos etc
     public ExpenseSearchResponseDto findExpenses(LocalDate startDate, LocalDate endDate, String name) {
 
         List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name)

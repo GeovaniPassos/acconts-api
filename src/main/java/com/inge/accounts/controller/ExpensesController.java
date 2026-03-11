@@ -42,10 +42,22 @@ public class ExpensesController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> findAll() {
-        List<ExpensesDto> list = service.findAll();
+    public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String name) {
 
-        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
+        ExpenseSearchResponseDto response;
+
+        if (startDate == null && endDate == null && name == null) {
+            response = service.findAll();
+
+            return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
+        }
+
+        response = service.findExpenses(startDate, endDate, name);
+
+        return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }
 
     @GetMapping("/{id}")
@@ -93,14 +105,5 @@ public class ExpensesController {
         return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado"));
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String name) {
 
-        ExpenseSearchResponseDto response = service.findExpenses(startDate, endDate, name);
-
-        return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
-    }
 }
