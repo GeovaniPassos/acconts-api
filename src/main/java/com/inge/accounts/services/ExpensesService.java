@@ -248,7 +248,6 @@ public class ExpensesService {
         return list;
     }
 
-    //TODO: Tratar o nome se receber apenas uma parte, e ignorar maiusculas e acentos etc
     public ExpenseSearchResponseDto findExpenses(LocalDate startDate, LocalDate endDate, String name) {
 
         List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name)

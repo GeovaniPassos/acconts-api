@@ -20,44 +20,44 @@ public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
             FROM Expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
-            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
+            AND (:name IS NULL OR LOWER(e.name)
+                LIKE LOWER(CONCAT('%', :name, '%')))
             ORDER BY e.name
             """)
     List<Expenses> findExpenses(LocalDate startDate, LocalDate endDate, String name);
 
-    @Query("""
+    @Query(value = """
             SELECT
                 COALESCE(SUM(e.value), 0)
-            FROM Expenses e
+            FROM tb_expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
-            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
-            """)
+            AND (:name IS NULL OR unaccent(LOWER(e.name))
+                LIKE unaccent(LOWER(CONCAT('%', :name, '%'))))
+            """, nativeQuery = true)
     BigDecimal sumValueTotalExpenses(LocalDate startDate, LocalDate endDate, String name);
 
-    @Query("""
+    @Query(value = """
             SELECT
                 COALESCE(SUM(e.value), 0)
-            FROM Expenses e
+            FROM tb_expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
-            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
+            AND (:name IS NULL OR unaccent(LOWER(e.name))
+                LIKE unaccent(LOWER(CONCAT('%', :name, '%'))))
             AND e.payment = true
-            """)
+            """, nativeQuery = true)
     BigDecimal sumValueTotalPaidExpenses(LocalDate startDate, LocalDate endDate, String name);
 
-    @Query("""
+    @Query(value = """
             SELECT
                 COALESCE(SUM(e.value), 0)
-            FROM Expenses e
+            FROM tb_expenses e
             WHERE (CAST(:startDate AS date) IS NULL OR e.date >= :startDate)
             AND (CAST(:endDate AS date) IS NULL OR e.date <= :endDate)
-            AND (:name IS NULL OR function('unaccent', LOWER(e.name))
-            LIKE function('unaccent', LOWER(CONCAT('%', :name, '%'))))
+            AND (:name IS NULL OR unaccent(LOWER(e.name))
+                LIKE unaccent(LOWER(CONCAT('%', :name, '%'))))
             AND e.payment = false
-            """)
+            """, nativeQuery = true)
     BigDecimal sumValueTotalUnpaidExpenses(LocalDate startDate, LocalDate endDate, String name);
 }
