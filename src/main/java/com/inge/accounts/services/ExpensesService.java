@@ -1,12 +1,10 @@
 package com.inge.accounts.services;
 
-import com.inge.accounts.domain.dto.ExpenseSearchResponseDto;
-import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
-import com.inge.accounts.domain.dto.ExpensesDto;
-import com.inge.accounts.domain.dto.ExpensesPatchDto;
+import com.inge.accounts.domain.dto.*;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
 import com.inge.accounts.domain.enums.TransactionType;
+import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
@@ -40,16 +38,29 @@ public class ExpensesService {
             addInstallments(toAddInstallmentsDto(dto));
         }
 
-        Category category = categoryService.findByNameAndType(
+        if (dto.categoryName() == null) {
+            throw new BusinessException("Deve ser informado a categoria.");
+        }
+
+        CategoryDto category = categoryService.findByNameAndType(
                 dto.categoryName(),
                 TransactionType.EXPENSES);
+
+        if (category == null) {
+            category = categoryService.create(
+                    new CategoryDto(
+                            null,
+                            dto.categoryName(),
+                            TransactionType.EXPENSES.toString()
+                    ));
+        }
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
 
         for(int i = 1; i <= total ;i++) {
 
-            Expenses expense = ExpensesMapper.toEntity(dto, category);
+            Expenses expense = ExpensesMapper.toEntity(dto, CategoryMapper.toEntity(category));
 
             expense.setInstallment(i);
             expense.setTotalInstallments(total);
@@ -148,9 +159,9 @@ public class ExpensesService {
         }
 
         if (dto.categoryName() != null) {
-            Category category = categoryService.findByNameAndType(
+            CategoryDto category = categoryService.findByNameAndType(
                     dto.categoryName(), TransactionType.EXPENSES);
-            expenses.setCategory(category);
+            expenses.setCategory(CategoryMapper.toEntity(category));
         }
 
         if (dto.payment() != null) {

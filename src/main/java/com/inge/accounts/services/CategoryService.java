@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -23,7 +24,7 @@ public class CategoryService {
     private CategoryDto dto;
 
     @Transactional
-    public void create(CategoryDto dto) {
+    public CategoryDto create(CategoryDto dto) {
 
         TransactionType type = TransactionType.fromString(dto.type());
 
@@ -34,8 +35,26 @@ public class CategoryService {
         }
 
         Category category = CategoryMapper.toEntity(dto);
-        categoryRepository.save(category);
+        return CategoryMapper.toDto(categoryRepository.save(category));
 
+    }
+
+    @Transactional
+    public CategoryDto findOrCreate(String name, TransactionType type) {
+
+        if (name == null && type == null) {
+            throw new BusinessException("Precisa informar o nome e o tipo da categoria.");
+        }
+        Optional<CategoryDto> categories = Optional.ofNullable(
+                CategoryMapper.toDto(
+                categoryRepository.findByNameAndType(name, type)));
+
+        return categories.orElseGet(() -> {
+            Category category = new Category();
+            category.setName(name);
+            category.setType(type);
+            return CategoryMapper.toDto(categoryRepository.save(category));
+        });
     }
 
     @Transactional(readOnly = true)
@@ -54,7 +73,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public Category findByNameAndType(String name, TransactionType type) {
+    public CategoryDto findByNameAndType(String name, TransactionType type) {
 
         if (StringUtils.isNullOrBlank(name)) {
             throw new BusinessException("O nome não pode ser nulo.");
@@ -64,7 +83,7 @@ public class CategoryService {
             throw new BusinessException("O tipo não pode ser nulo.");
         }
 
-        return categoryRepository.findByNameAndType(name, type);
+        return CategoryMapper.toDto(categoryRepository.findByNameAndType(name, type));
     }
 
     @Transactional(readOnly = true)
