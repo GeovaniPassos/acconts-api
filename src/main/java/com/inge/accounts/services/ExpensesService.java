@@ -149,9 +149,9 @@ public class ExpensesService {
         }
 
         if (dto.categoryName() != null) {
-            CategoryDto category = categoryService.findByNameAndType(
+            Category category = categoryService.findOrCreate(
                     dto.categoryName(), TransactionType.EXPENSES);
-            expenses.setCategory(CategoryMapper.toEntity(category));
+            expenses.setCategory(category);
         }
 
         if (dto.payment() != null) {

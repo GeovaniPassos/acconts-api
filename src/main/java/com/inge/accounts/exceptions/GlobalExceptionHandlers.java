@@ -66,6 +66,8 @@ public class GlobalExceptionHandlers {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    //TODO: Criar o metodo caso não receber id no parametro do controller.
-
+    public ResponseEntity<ApiResponse<Void>>  handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        String message = "Erro no envio do parametro: " + ex.getMessage();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(message));
+    }
 }
