@@ -40,7 +40,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDto findOrCreate(String name, TransactionType type) {
+    public Category findOrCreate(String name, TransactionType type) {
 
         if (name == null || type == null) {
             throw new BusinessException("Precisa informar o nome e o tipo da categoria.");
@@ -50,10 +50,10 @@ public class CategoryService {
 
         if (category == null) {
             category = new Category(name, type);
-            return CategoryMapper.toDto(categoryRepository.save(category));
+            return categoryRepository.save(category);
         }
 
-        return CategoryMapper.toDto(category);
+        return category;
     }
 
     @Transactional(readOnly = true)

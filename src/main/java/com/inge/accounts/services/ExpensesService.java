@@ -44,14 +44,14 @@ public class ExpensesService {
             throw new BusinessException("Deve ser informado a categoria.");
         }
 
-        CategoryDto category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
+        Category category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
 
         for(int i = 1; i <= total ;i++) {
 
-            Expenses expense = ExpensesMapper.toEntity(dto, CategoryMapper.toEntity(category));
+            Expenses expense = ExpensesMapper.toEntity(dto, category);
 
             expense.setInstallment(i);
             expense.setTotalInstallments(total);
