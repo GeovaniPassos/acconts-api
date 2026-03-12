@@ -42,19 +42,18 @@ public class CategoryService {
     @Transactional
     public CategoryDto findOrCreate(String name, TransactionType type) {
 
-        if (name == null && type == null) {
+        if (name == null || type == null) {
             throw new BusinessException("Precisa informar o nome e o tipo da categoria.");
         }
-        Optional<CategoryDto> categories = Optional.ofNullable(
-                CategoryMapper.toDto(
-                categoryRepository.findByNameAndType(name, type)));
 
-        return categories.orElseGet(() -> {
-            Category category = new Category();
-            category.setName(name);
-            category.setType(type);
+        Category category = categoryRepository.findByNameAndType(name, type);
+
+        if (category == null) {
+            category = new Category(name, type);
             return CategoryMapper.toDto(categoryRepository.save(category));
-        });
+        }
+
+        return CategoryMapper.toDto(category);
     }
 
     @Transactional(readOnly = true)

@@ -34,26 +34,17 @@ public class ExpensesService {
     @Transactional
     public void createExpenses(ExpensesDto dto) {
 
+        //Se a despesa já existir, inserir parcela
         if (!expensesRepository.findByName(dto.name()).isEmpty()) {
             addInstallments(toAddInstallmentsDto(dto));
+            return;
         }
 
         if (dto.categoryName() == null) {
             throw new BusinessException("Deve ser informado a categoria.");
         }
 
-        CategoryDto category = categoryService.findByNameAndType(
-                dto.categoryName(),
-                TransactionType.EXPENSES);
-
-        if (category == null) {
-            category = categoryService.create(
-                    new CategoryDto(
-                            null,
-                            dto.categoryName(),
-                            TransactionType.EXPENSES.toString()
-                    ));
-        }
+        CategoryDto category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
@@ -72,7 +63,6 @@ public class ExpensesService {
         }
     }
 
-    //TODO: Ajustar a validação no valor para bigdecimal
     @Transactional
     public void addInstallments(ExpensesAddInstallmentsDto dto) {
 

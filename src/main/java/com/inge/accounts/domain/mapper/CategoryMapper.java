@@ -14,6 +14,7 @@ public class CategoryMapper {
         if (dto == null) return null;
 
         Category category = new Category();
+        category.setId(dto.id());
         category.setName(dto.name());
         category.setType(TransactionType.fromString(dto.type()));
 
