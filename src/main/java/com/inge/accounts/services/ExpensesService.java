@@ -156,9 +156,10 @@ public class ExpensesService {
 
         if (dto.payment() != null) {
             expenses.setPayment(dto.payment());
-            expenses.setPaymentDate(dto.paymentDate());
-            if (dto.payment() && dto.paymentDate() == null) {
-                expenses.setPaymentDate(LocalDate.now());
+
+            if (dto.payment()) {
+                LocalDate date = dto.paymentDate() != null ? dto.paymentDate() : LocalDate.now();
+                expenses.setPaymentDate(date);
             } else {
                 expenses.setPaymentDate(null);
             }
