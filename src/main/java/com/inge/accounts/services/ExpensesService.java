@@ -257,10 +257,6 @@ public class ExpensesService {
                 .map(ExpensesMapper::toDto)
                 .toList();
 
-        if (list.isEmpty()) {
-            throw new BusinessException("Nunhuma despesa encontrada!");
-        }
-
         BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
         BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
         BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
