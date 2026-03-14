@@ -1,5 +1,7 @@
 package com.inge.accounts.domain.enums;
 
+import com.inge.accounts.exceptions.BusinessException;
+
 public enum TransactionType {
     EXPENSES,
     RECEIPT;
@@ -8,7 +10,7 @@ public enum TransactionType {
         try {
             return TransactionType.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Tipo '" + value + "', é inválido");
+            throw new BusinessException("Tipo '" + value + "', é inválido");
         }
     }
 }
