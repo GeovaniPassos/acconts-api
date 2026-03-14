@@ -9,9 +9,9 @@ import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.CategoryRepository;
 import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,14 +24,7 @@ public class CategoryService {
     private CategoryDto dto;
 
     @Transactional
-    public void create(CategoryDto dto) {
-        if (StringUtils.isNullOrBlank(dto.name())) {
-            throw new BusinessException("O nome está vazio");
-        }
-
-        if (StringUtils.isNullOrBlank(dto.type())) {
-            throw new BusinessException("O tipo está vazio");
-        }
+    public CategoryDto create(CategoryDto dto) {
 
         TransactionType type = TransactionType.fromString(dto.type());
 
@@ -42,65 +35,93 @@ public class CategoryService {
         }
 
         Category category = CategoryMapper.toEntity(dto);
-        categoryRepository.save(category);
+        return CategoryMapper.toDto(categoryRepository.save(category));
 
     }
 
+    @Transactional
+    public Category findOrCreate(String name, TransactionType type) {
+
+        if (name == null || type == null) {
+            throw new BusinessException("Precisa informar o nome e o tipo da categoria.");
+        }
+
+        Category category = categoryRepository.findByNameAndType(name, type);
+
+        if (category == null) {
+            category = new Category(name, type);
+            return categoryRepository.save(category);
+        }
+
+        return category;
+    }
+
+    @Transactional(readOnly = true)
     public List<CategoryDto> findAll() {
-        return categoryRepository.findAll()
+
+        List<CategoryDto> list = categoryRepository.findAll()
                 .stream()
                 .map(CategoryMapper::toDto)
                 .toList();
+
+        if (list.isEmpty()) {
+            throw new BusinessException("Nenhuma categoria encontrada.");
+        }
+
+        return list;
     }
 
-    public Category findByNameAndType(String name, TransactionType type) {
-        return categoryRepository.findByNameAndType(name, type);
+    @Transactional(readOnly = true)
+    public CategoryDto findByNameAndType(String name, TransactionType type) {
+
+        if (StringUtils.isNullOrBlank(name)) {
+            throw new BusinessException("O nome não pode ser nulo.");
+        }
+
+        if (StringUtils.isNullOrBlank(type.toString())) {
+            throw new BusinessException("O tipo não pode ser nulo.");
+        }
+
+        return CategoryMapper.toDto(categoryRepository.findByNameAndType(name, type));
     }
 
+    @Transactional(readOnly = true)
+    public CategoryDto findById(Long id) {
 
-    public Optional<CategoryDto> findById(Long id) {
+        if (id == null) {
+            throw new BusinessException("O id é nulo.");
+        }
+
         return categoryRepository.findById(id)
-                .map(CategoryMapper::toDto);
+                .map(CategoryMapper::toDto).orElseThrow(() ->
+                        new BusinessException("Categoria não encontrada com id: " + id));
     }
 
     @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Categoria não encontrada!"));
+                        new BusinessException("Categoria não encontrada!"));
 
         categoryRepository.delete(category);
 
     }
 
     @Transactional
-    public CategoryDto update(Long id, CategoryDto dto) {
+    public void update(Long id, CategoryDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Despesa não encontrada!"));
+                        new EntityNotFoundException("Categoria não encontrada!"));
 
         CategoryMapper.updateEntity(category, dto);
-
-        return CategoryMapper.toDto(category);
     }
 
     @Transactional
-    public CategoryDto patch(Long id, CategoryPatchDto dto) {
-
+    public void patch(Long id, CategoryPatchDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Categoria de despesa não encontrada com id: " + id
-                ));
+                        "Categoria de despesa não encontrada com id: " + id));
 
-        if (dto.name() != null) {
-            category.setName(dto.name());
-        }
-
-        if (dto.type() != null) {
-            category.setType(TransactionType.fromString(dto.type()));
-        }
-
-        return CategoryMapper.toDto(category);
+        CategoryMapper.copyNonNullProperties(category, dto);
     }
-
 }

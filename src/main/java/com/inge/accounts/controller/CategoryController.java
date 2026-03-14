@@ -2,14 +2,19 @@ package com.inge.accounts.controller;
 
 import com.inge.accounts.domain.dto.CategoryDto;
 import com.inge.accounts.domain.dto.CategoryPatchDto;
+import com.inge.accounts.domain.validations.OnUpdate;
 import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.CategoryService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.inge.accounts.domain.validations.OnCreate;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/categories")
@@ -23,10 +28,10 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> create(@RequestBody CategoryDto dto) {
+    public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody CategoryDto dto) {
         service.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.success("Categoria criada com sucesso"));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Categoria criada com sucesso"));
     }
 
     @GetMapping
@@ -34,22 +39,17 @@ public class CategoryController {
 
         List<CategoryDto> list = service.findAll();
 
-        if (list.isEmpty()) {
-            return ResponseEntity.ok(
-                    ApiResponse.empty("Nunhuma categoria encontrada com o filtro informado"));
-        }
-
         return ResponseEntity.ok(
                 ApiResponse.success("Resultado da busca", list));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryDto>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CategoryDto>> findById(@PathVariable @NonNull Long id) {
 
-        return service.findById(id)
-                .map(dto -> ResponseEntity.ok(ApiResponse.success("Categoria encontrada", dto)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("Categoria não encontrada")));
+        CategoryDto list = service.findById(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Resultado da busca", list));
     }
 
     @DeleteMapping("/{id}")
@@ -59,15 +59,15 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> update(@PathVariable Long id, @RequestBody CategoryDto dto) {
-        CategoryDto updated = service.update(id, dto);
+    public ResponseEntity<ApiResponse<Void>> update(@Validated(OnUpdate.class)  @PathVariable @NonNull Long id, @RequestBody CategoryDto dto) {
+        service.update(id, dto);
 
         return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<ApiResponse<Void>> patch(@PathVariable Long id, @RequestBody CategoryPatchDto dto) {
-        CategoryDto patch = service.patch(id, dto);
+    public  ResponseEntity<ApiResponse<Void>> patch(@PathVariable @NonNull Long id, @RequestBody CategoryPatchDto dto) {
+        service.patch(id, dto);
 
         return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
     }

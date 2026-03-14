@@ -29,11 +29,15 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> empty(String message) {
-        return new ApiResponse<>(true, message, null);
+        return new ApiResponse<>(true, message);
     }
 
     public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>(false, message, null);
+        return new ApiResponse<>(false, message);
+    }
+
+    public static <T> ApiResponse<T> error(String message, T details) {
+        return new ApiResponse<>(false, message, details);
     }
 
     public boolean isSuccess() {

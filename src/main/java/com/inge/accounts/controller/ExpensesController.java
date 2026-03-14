@@ -1,12 +1,16 @@
 package com.inge.accounts.controller;
 
+import com.inge.accounts.domain.dto.ExpenseSearchResponseDto;
 import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.dto.ExpensesPatchDto;
+import com.inge.accounts.domain.validations.OnCreate;
 import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.ExpensesService;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,36 +28,45 @@ public class ExpensesController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> create(@RequestBody ExpensesDto dto) {
+    public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody ExpensesDto dto) {
         service.createExpenses(dto);
-        System.out.println(ApiResponse.success("Despesa criada com sucesso"));
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Despesa criada com sucesso"));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Despesa criada com sucesso"));
     }
 
     @PostMapping("/addInstallments")
     public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
         service.addInstallments(dto);
-        return ResponseEntity.ok(ApiResponse.success("Parcela(s) da(s) despesa atualizada com sucesso"));
+        return ResponseEntity.ok(ApiResponse
+                .success("Parcela(s) da(s) despesa atualizada com sucesso"));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> findAll() {
-        List<ExpensesDto> list = service.findAll();
+    public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String name) {
 
-        if(list.isEmpty()) {
-            return ResponseEntity.ok(
-                    ApiResponse.empty("Nenhuma despesa encontrada com o filtro informado"));
+        ExpenseSearchResponseDto response;
+
+        if (startDate == null && endDate == null && name == null) {
+            response = service.findAll();
+
+            return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
         }
 
-        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
+        response = service.findExpenses(startDate, endDate, name);
+
+        return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ExpensesDto>> findById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(dto -> ResponseEntity.ok(ApiResponse.success("Despesa encontrada", dto)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Despesa não encontrada")));
+
+        ExpensesDto expense = service.findById(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Resultado da busca: ", expense));
     }
 
     @DeleteMapping("/{id}")
@@ -63,48 +76,34 @@ public class ExpensesController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> patch(@PathVariable Long id, @RequestBody ExpensesPatchDto dto) {
+    public ResponseEntity<ApiResponse<Void>> patch(@PathVariable @NotNull Long id, @RequestBody ExpensesPatchDto dto) {
         service.patch(id, dto);
-
         return ResponseEntity.ok(ApiResponse.success("Despesa atualizada com sucesso"));
     }
 
     @GetMapping("/by-period")
     public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByPeriod(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         List<ExpensesDto> list = service.findByPeriod(startDate, endDate);
-
-        if (list.isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.empty("Nenhuma despesa encontrada no periodo"));
-        }
-
         return ResponseEntity.ok(ApiResponse.success("Lista de resultado", list));
     }
 
     @GetMapping("/by-month")
     public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByMonth(@RequestParam int year, @RequestParam int month) {
         List<ExpensesDto> list = service.findByMonth(YearMonth.of(year, month));
-
-        if (list.isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.empty("Nenhuma despesa encontrada no periodo"));
-        }
-
         return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByNameContainsIgnoreCase(@RequestParam String name) {
         List<ExpensesDto> list = service.findByName(name);
-
-        if (list.isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.empty("Nenhuma despesa encontrada por nome"));
-        }
-
         return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
     }
 
     @PatchMapping("/{id}/toggle-payment")
-    public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable @NotNull Long id) {
         service.togglePayment(id);
         return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado"));
     }
+
+
 }
