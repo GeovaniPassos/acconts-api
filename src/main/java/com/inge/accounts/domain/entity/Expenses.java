@@ -42,6 +42,10 @@ public class Expenses {
     @Column
     private LocalDate date;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User userId;
+
     public Long getId() {
         return id;
     }
@@ -104,5 +108,17 @@ public class Expenses {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUserId() {
+        return userId;
+    }
+
+    public void setUserId(User userId) {
+        this.userId = userId;
     }
 }

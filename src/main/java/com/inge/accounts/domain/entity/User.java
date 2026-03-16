@@ -1,10 +1,16 @@
 package com.inge.accounts.domain.entity;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import org.springframework.security.core.userdetails.UserDetails;
 
+@Entity
+@Table(name= "tb_users")
 public class User {
 
-    @id
+    @Id
     @GeneratedValue
     private Long id;
 
@@ -20,7 +26,7 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
+    public UserDetails getUsername() {
         return username;
     }
 
