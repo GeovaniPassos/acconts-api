@@ -1,9 +1,6 @@
 package com.inge.accounts.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -14,6 +11,7 @@ public class User {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String username;
     private String password;
     private String role;

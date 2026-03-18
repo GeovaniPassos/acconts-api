@@ -2,6 +2,7 @@ package com.inge.accounts.services;
 
 import com.inge.accounts.domain.dto.UserDto;
 import com.inge.accounts.domain.entity.User;
+import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,10 @@ public class UserService {
     }
 
     public User createUser(UserDto dto) {
+
+        if (repository.existsByUsername(dto.username())) {
+            throw new BusinessException("Usuário já existe");
+        }
 
         User user = new User();
 
