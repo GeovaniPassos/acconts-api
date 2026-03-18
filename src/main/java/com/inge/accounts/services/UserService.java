@@ -4,7 +4,6 @@ import com.inge.accounts.domain.dto.UserDto;
 import com.inge.accounts.domain.entity.User;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.UserRepository;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

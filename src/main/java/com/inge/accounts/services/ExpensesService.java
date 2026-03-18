@@ -3,11 +3,12 @@ package com.inge.accounts.services;
 import com.inge.accounts.domain.dto.*;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
+import com.inge.accounts.domain.entity.User;
 import com.inge.accounts.domain.enums.TransactionType;
-import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
+import com.inge.accounts.repository.UserRepository;
 import com.inge.accounts.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +25,25 @@ public class ExpensesService {
 
     private final ExpensesRepository expensesRepository;
     private final CategoryService categoryService;
+    private final UserRepository userRepository;
 
     public ExpensesService(ExpensesRepository expensesRepository,
-                           CategoryService categoryService) {
+                           CategoryService categoryService,
+                           UserRepository userRepository) {
         this.expensesRepository = expensesRepository;
         this.categoryService = categoryService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public void createExpenses(ExpensesDto dto) {
+    public void createExpenses(String username, ExpensesDto dto) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         //Se a despesa já existir, inserir parcela
         if (!expensesRepository.findByName(dto.name()).isEmpty()) {
-            addInstallments(toAddInstallmentsDto(dto));
+            addInstallments(toAddInstallmentsDto(dto), User user);
             return;
         }
 
@@ -51,7 +58,7 @@ public class ExpensesService {
 
         for(int i = 1; i <= total ;i++) {
 
-            Expenses expense = ExpensesMapper.toEntity(dto, category);
+            Expenses expense = ExpensesMapper.toEntity(dto, category, user);
 
             expense.setInstallment(i);
             expense.setTotalInstallments(total);
@@ -63,8 +70,9 @@ public class ExpensesService {
         }
     }
 
+    //TODO: Ajustar o user id
     @Transactional
-    public void addInstallments(ExpensesAddInstallmentsDto dto) {
+    public void addInstallments(ExpensesAddInstallmentsDto dto, User user) {
 
         List<Expenses> expenses = expensesRepository.findByName(dto.name());
 

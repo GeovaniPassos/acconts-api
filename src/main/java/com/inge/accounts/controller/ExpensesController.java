@@ -31,7 +31,9 @@ public class ExpensesController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody ExpensesDto dto,
                                                     Authentication authentication) {
-        service.createExpenses(dto);
+        String username = authentication.getName();
+
+        service.createExpenses(username, dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Despesa criada com sucesso"));
     }
