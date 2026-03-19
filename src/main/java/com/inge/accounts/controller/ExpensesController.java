@@ -39,8 +39,11 @@ public class ExpensesController {
     }
 
     @PostMapping("/addInstallments")
-    public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto) {
-        service.addInstallments(dto);
+    public ResponseEntity<ApiResponse<Void>> addInstallments(@RequestBody ExpensesAddInstallmentsDto dto,
+                                                             Authentication authentication) {
+        String username = authentication.getName();
+
+        service.addInstallments(dto, username);
         return ResponseEntity.ok(ApiResponse
                 .success("Parcela(s) da(s) despesa atualizada com sucesso"));
     }
@@ -49,17 +52,20 @@ public class ExpensesController {
     public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String name) {
+            @RequestParam(required = false) String name,
+            Authentication authentication) {
+
+        String username = authentication.getName();
 
         ExpenseSearchResponseDto response;
 
         if (startDate == null && endDate == null && name == null) {
-            response = service.findAll();
+            response = service.findAll(username);
 
             return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
         }
 
-        response = service.findExpenses(startDate, endDate, name);
+        response = service.findExpenses(startDate, endDate, name, username);
 
         return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }

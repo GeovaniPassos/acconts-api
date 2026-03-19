@@ -43,7 +43,7 @@ public class ExpensesService {
 
         //Se a despesa já existir, inserir parcela
         if (!expensesRepository.findByName(dto.name()).isEmpty()) {
-            addInstallments(toAddInstallmentsDto(dto), User user);
+            addInstallments(toAddInstallmentsDto(dto), username);
             return;
         }
 
@@ -70,9 +70,11 @@ public class ExpensesService {
         }
     }
 
-    //TODO: Ajustar o user id""
     @Transactional
-    public void addInstallments(ExpensesAddInstallmentsDto dto, User user) {
+    public void addInstallments(ExpensesAddInstallmentsDto dto, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         List<Expenses> expenses = expensesRepository.findByName(dto.name());
 
@@ -88,7 +90,10 @@ public class ExpensesService {
         for(int i = 1; i <= dto.installments(); i++){
             Expenses newExpense = ExpensesMapper.copyExpensesAddInstallments(lastExpense, newTotalInstallments);
 
+            newExpense.setUser(user);
+
             newExpense.setInstallment(lastExpense.getInstallment() + i);
+
             if (dto.value() != null) newExpense.setValue(dto.value());
             newExpense.setDate(lastDate.plusMonths(i));
 
@@ -97,7 +102,11 @@ public class ExpensesService {
     }
 
     @Transactional(readOnly = true)
-    public ExpenseSearchResponseDto findAll() {
+    public ExpenseSearchResponseDto findAll(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
         List<ExpensesDto> list = expensesRepository.findAll()
                 .stream()
                 .map(ExpensesMapper::toDto)
@@ -119,7 +128,10 @@ public class ExpensesService {
     }
 
     @Transactional(readOnly = true)
-    public ExpensesDto findById(Long id) {
+    public ExpensesDto findById(Long id, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
