@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
     List<Expenses> findAllByUserId(Long id);
     Optional<Expenses> findByIdAndUser(Long id, Long userId);
-    List<Expenses> findByName(String name);
+    Boolean findByNameAndUser(String name, Long userId);
 
     @Query("""
             SELECT e

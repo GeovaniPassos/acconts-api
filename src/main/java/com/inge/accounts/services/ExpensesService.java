@@ -41,7 +41,7 @@ public class ExpensesService {
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         //Se a despesa já existir, inserir parcela
-        if (!expensesRepository.findByName(dto.name()).isEmpty()) {
+        if (expensesRepository.findByNameAndUser(dto.name(), user.getId())) {
             addInstallmentsByUser(toAddInstallmentsDto(dto), username);
             return;
         }
@@ -50,7 +50,7 @@ public class ExpensesService {
             throw new BusinessException("Deve ser informado a categoria.");
         }
 
-        Category category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
+        Category category = categoryService.findOrCreateByUser(dto.categoryName(), TransactionType.EXPENSES, username);
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
@@ -75,7 +75,7 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<Expenses> expenses = expensesRepository.findByName(dto.name());
+        List<Expenses> expenses = expensesRepository.findExpenses(null, null, dto.name(), user.getId());
 
         Expenses lastExpense =  expenses.stream()
                 .max(Comparator.comparing(Expenses::getInstallment))
@@ -143,7 +143,7 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void delete(Long id, String username) {
+    public void deleteByUser(Long id, String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
@@ -156,7 +156,7 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void patch(Long id, ExpensesPatchDto dto, String username) {
+    public void patchByUser(Long id, ExpensesPatchDto dto, String username) {
 
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
@@ -178,8 +178,8 @@ public class ExpensesService {
         }
 
         if (dto.categoryName() != null) {
-            Category category = categoryService.findOrCreate(
-                    dto.categoryName(), TransactionType.EXPENSES);
+            Category category = categoryService.findOrCreateByUser(
+                    dto.categoryName(), TransactionType.EXPENSES, username);
             expenses.setCategory(category);
         }
 

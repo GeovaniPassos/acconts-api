@@ -85,7 +85,7 @@ public class ExpensesController {
                                                     Authentication authentication) {
         String username = authentication.getName();
 
-        service.delete(id, username);
+        service.deleteByUser(id, username);
         return ResponseEntity.ok(ApiResponse.success("Despesa removida com sucesso"));
     }
 
@@ -95,7 +95,7 @@ public class ExpensesController {
                                                    Authentication authentication) {
         String username = authentication.getName();
 
-        service.patch(id, dto, username);
+        service.patchByUser(id, dto, username);
         return ResponseEntity.ok(ApiResponse.success("Despesa atualizada com sucesso"));
     }
 
