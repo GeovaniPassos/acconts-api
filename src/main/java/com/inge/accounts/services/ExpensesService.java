@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.*;
 
 import static com.inge.accounts.domain.mapper.ExpensesMapper.toAddInstallmentsDto;
@@ -43,7 +42,7 @@ public class ExpensesService {
 
         //Se a despesa já existir, inserir parcela
         if (!expensesRepository.findByName(dto.name()).isEmpty()) {
-            addInstallments(toAddInstallmentsDto(dto), username);
+            addInstallmentsByUser(toAddInstallmentsDto(dto), username);
             return;
         }
 
@@ -71,7 +70,7 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void addInstallments(ExpensesAddInstallmentsDto dto, String username) {
+    public void addInstallmentsByUser(ExpensesAddInstallmentsDto dto, String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
@@ -102,12 +101,12 @@ public class ExpensesService {
     }
 
     @Transactional(readOnly = true)
-    public ExpenseSearchResponseDto findAll(String username) {
+    public ExpenseSearchResponseDto findAllByUser(String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<ExpensesDto> list = expensesRepository.findAll()
+        List<ExpensesDto> list = expensesRepository.findAllByUserId(user.getId())
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
@@ -120,43 +119,53 @@ public class ExpensesService {
         LocalDate endDate = null;
         String name = null;
 
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
+        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name, user.getId());
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name, user.getId());
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name, user.getId());
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }
 
     @Transactional(readOnly = true)
-    public ExpensesDto findById(Long id, String username) {
+    public ExpensesDto findByIdAndUser(Long id, String username) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+                .orElseThrow(() ->
+                        new BusinessException("Usuário não encontrado"));
 
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
         }
 
-        return expensesRepository.findById(id)
+        return expensesRepository.findByIdAndUser(id, user.getId())
                 .map(ExpensesMapper::toDto).orElseThrow(() ->
                         new BusinessException("Despesa não encontrada com o id: " + id));
     }
 
     @Transactional
-    public void delete(Long id) {
-        Expenses expenses = expensesRepository.findById(id)
+    public void delete(Long id, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new BusinessException("Usuário não encontrado"));
+
+        Expenses expenses = expensesRepository.findByIdAndUser(id, user.getId())
                 .orElseThrow(() ->
                         new BusinessException("Despesa não encontrada!"));
         expensesRepository.delete(expenses);
     }
 
     @Transactional
-    public void patch(Long id, ExpensesPatchDto dto) {
+    public void patch(Long id, ExpensesPatchDto dto, String username) {
+
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
         }
 
-        Expenses expenses = expensesRepository.findById(id)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Expenses expenses = expensesRepository.findByIdAndUser(id, user.getId())
                 .orElseThrow(() -> new BusinessException(
                         "Despesa não encontrada para edição."));
 
@@ -197,12 +206,16 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void togglePayment(Long id) {
+    public void togglePaymentByUser(Long id, String username) {
+
         if (id == null) {
             throw new BusinessException("Id não pode ser nulo.");
         }
 
-        Expenses expense = expensesRepository.findById(id)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Expenses expense = expensesRepository.findByIdAndUser(id, user.getId())
                 .orElseThrow(() -> new BusinessException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
@@ -217,69 +230,19 @@ public class ExpensesService {
         ExpensesMapper.toDto(expense);
     }
 
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByPeriod(LocalDate startDate, LocalDate endDate) {
-        if (startDate.isAfter(endDate)) {
-            throw new BusinessException("Data inicial não pode ser maior que a final.");
-        }
+    public ExpenseSearchResponseDto findExpensesByUser(LocalDate startDate, LocalDate endDate, String name, String username) {
 
-        List<ExpensesDto> list = expensesRepository.findByDateBetween(startDate, endDate)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name, user.getId())
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
 
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada no periodo");
-        }
-
-        return list;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByMonth(YearMonth yearMonth) {
-        LocalDate start = yearMonth.atDay(1);
-        LocalDate end = yearMonth.atEndOfMonth();
-
-        List<ExpensesDto> list = expensesRepository.findByDateBetween(start, end)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada no periodo.");
-        }
-
-        return list;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByName(String name) {
-        if (StringUtils.isNullOrBlank(name)) {
-            throw new BusinessException("O nome não pode ser nulo na pesquisa!");
-        }
-
-        List<ExpensesDto> list = expensesRepository.findByNameContainsIgnoreCase(name)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada com o nome.");
-        }
-
-        return list;
-    }
-
-    public ExpenseSearchResponseDto findExpenses(LocalDate startDate, LocalDate endDate, String name) {
-
-        List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
+        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name, user.getId());
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name, user.getId());
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name, user.getId());
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }

@@ -43,7 +43,7 @@ public class ExpensesController {
                                                              Authentication authentication) {
         String username = authentication.getName();
 
-        service.addInstallments(dto, username);
+        service.addInstallmentsByUser(dto, username);
         return ResponseEntity.ok(ApiResponse
                 .success("Parcela(s) da(s) despesa atualizada com sucesso"));
     }
@@ -60,58 +60,51 @@ public class ExpensesController {
         ExpenseSearchResponseDto response;
 
         if (startDate == null && endDate == null && name == null) {
-            response = service.findAll(username);
+            response = service.findAllByUser(username);
 
             return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
         }
 
-        response = service.findExpenses(startDate, endDate, name, username);
+        response = service.findExpensesByUser(startDate, endDate, name, username);
 
         return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ExpensesDto>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ExpensesDto>> findById(@PathVariable Long id, Authentication authentication) {
 
-        ExpensesDto expense = service.findById(id);
+        String username = authentication.getName();
+        ExpensesDto expense = service.findByIdAndUser(id, username);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Resultado da busca: ", expense));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id,
+                                                    Authentication authentication) {
+        String username = authentication.getName();
+
+        service.delete(id, username);
         return ResponseEntity.ok(ApiResponse.success("Despesa removida com sucesso"));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> patch(@PathVariable @NotNull Long id, @RequestBody ExpensesPatchDto dto) {
-        service.patch(id, dto);
+    public ResponseEntity<ApiResponse<Void>> patch(@PathVariable @NotNull Long id,
+                                                   @RequestBody ExpensesPatchDto dto,
+                                                   Authentication authentication) {
+        String username = authentication.getName();
+
+        service.patch(id, dto, username);
         return ResponseEntity.ok(ApiResponse.success("Despesa atualizada com sucesso"));
     }
 
-    @GetMapping("/by-period")
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByPeriod(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
-        List<ExpensesDto> list = service.findByPeriod(startDate, endDate);
-        return ResponseEntity.ok(ApiResponse.success("Lista de resultado", list));
-    }
-
-    @GetMapping("/by-month")
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByMonth(@RequestParam int year, @RequestParam int month) {
-        List<ExpensesDto> list = service.findByMonth(YearMonth.of(year, month));
-        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<ExpensesDto>>> findByNameContainsIgnoreCase(@RequestParam String name) {
-        List<ExpensesDto> list = service.findByName(name);
-        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
-    }
-
     @PatchMapping("/{id}/toggle-payment")
-    public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable @NotNull Long id) {
-        service.togglePayment(id);
+    public ResponseEntity<ApiResponse<Void>> togglePayment(@PathVariable @NotNull Long id, Authentication authentication) {
+
+        String username = authentication.getName();
+
+        service.togglePaymentByUser(id, username);
         return ResponseEntity.ok(ApiResponse.success("Pagamento atualizado"));
     }
 
