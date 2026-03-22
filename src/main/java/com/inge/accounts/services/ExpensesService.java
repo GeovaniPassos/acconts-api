@@ -9,7 +9,6 @@ import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
 import com.inge.accounts.repository.UserRepository;
-import com.inge.accounts.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,7 @@ public class ExpensesService {
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         //Se a despesa já existir, inserir parcela
-        if (expensesRepository.findByNameAndUser(dto.name(), user.getId())) {
+        if (expensesRepository.existsByNameAndUserId(dto.name(), user.getId())) {
             addInstallmentsByUser(toAddInstallmentsDto(dto), username);
             return;
         }
@@ -75,7 +74,7 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<Expenses> expenses = expensesRepository.findExpenses(null, null, dto.name(), user.getId());
+        List<Expenses> expenses = expensesRepository.findExpensesByUserId(null, null, dto.name(), user.getId());
 
         Expenses lastExpense =  expenses.stream()
                 .max(Comparator.comparing(Expenses::getInstallment))
@@ -119,9 +118,9 @@ public class ExpensesService {
         LocalDate endDate = null;
         String name = null;
 
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name, user.getId());
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name, user.getId());
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name, user.getId());
+        BigDecimal total = expensesRepository.sumValueTotalExpensesByUserId(startDate, endDate, name, user.getId());
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpensesByUserId(startDate, endDate, name, user.getId());
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpensesByUserId(startDate, endDate, name, user.getId());
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }
@@ -137,7 +136,7 @@ public class ExpensesService {
             throw new BusinessException("O id não pode ser nulo.");
         }
 
-        return expensesRepository.findByIdAndUser(id, user.getId())
+        return expensesRepository.findByIdAndUserId(id, user.getId())
                 .map(ExpensesMapper::toDto).orElseThrow(() ->
                         new BusinessException("Despesa não encontrada com o id: " + id));
     }
@@ -149,7 +148,7 @@ public class ExpensesService {
                 .orElseThrow(() ->
                         new BusinessException("Usuário não encontrado"));
 
-        Expenses expenses = expensesRepository.findByIdAndUser(id, user.getId())
+        Expenses expenses = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() ->
                         new BusinessException("Despesa não encontrada!"));
         expensesRepository.delete(expenses);
@@ -165,7 +164,7 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        Expenses expenses = expensesRepository.findByIdAndUser(id, user.getId())
+        Expenses expenses = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BusinessException(
                         "Despesa não encontrada para edição."));
 
@@ -215,7 +214,7 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        Expenses expense = expensesRepository.findByIdAndUser(id, user.getId())
+        Expenses expense = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BusinessException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
@@ -235,14 +234,14 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name, user.getId())
+        List<ExpensesDto> list = expensesRepository.findExpensesByUserId(startDate, endDate, name, user.getId())
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
 
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name, user.getId());
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name, user.getId());
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name, user.getId());
+        BigDecimal total = expensesRepository.sumValueTotalExpensesByUserId(startDate, endDate, name, user.getId());
+        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpensesByUserId(startDate, endDate, name, user.getId());
+        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpensesByUserId(startDate, endDate, name, user.getId());
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }

@@ -9,22 +9,23 @@ import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.CategoryRepository;
 import com.inge.accounts.repository.UserRepository;
-import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-    private CategoryDto dto;
-    private UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+
+    public CategoryService(CategoryRepository categoryRepository,
+                           UserRepository userRepository) {
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+    }
 
     @Transactional
     public void createByUser(CategoryDto dto, String username) {
@@ -35,8 +36,8 @@ public class CategoryService {
 
         TransactionType type = TransactionType.fromString(dto.type());
 
-        if (categoryRepository.existsByNameAndTypeAndUser(dto.name(), type, user.getId())) {
-            Category cat = categoryRepository.findByNameAndTypeAndUser(dto.name(), type, user.getId());
+        if (categoryRepository.existsByNameAndTypeAndUserId(dto.name(), type, user.getId())) {
+            Category cat = categoryRepository.findByNameAndTypeAndUserId(dto.name(), type, user.getId());
             throw new BusinessException("Categoria já existe com o id: "
                     + cat.getId());
         }
@@ -58,7 +59,7 @@ public class CategoryService {
             throw new BusinessException("Precisa informar o nome e o tipo da categoria.");
         }
 
-        Category category = categoryRepository.findByNameAndTypeAndUser(name, type, user.getId());
+        Category category = categoryRepository.findByNameAndTypeAndUserId(name, type, user.getId());
 
         if (category == null) {
             category = new Category(name, type, user);
@@ -75,7 +76,7 @@ public class CategoryService {
                 .orElseThrow(() ->
                         new BusinessException("Usuário não encontrado"));
 
-        List<CategoryDto> list = categoryRepository.findAllByUser(user.getId())
+        List<CategoryDto> list = categoryRepository.findAllByUserId(user.getId())
                 .stream()
                 .map(CategoryMapper::toDto)
                 .toList();
@@ -98,7 +99,7 @@ public class CategoryService {
             throw new BusinessException("O id é nulo.");
         }
 
-        return categoryRepository.findByIdAndUser(id, user.getId())
+        return categoryRepository.findByIdAndUserId(id, user.getId())
                 .map(CategoryMapper::toDto).orElseThrow(() ->
                         new BusinessException("Categoria não encontrada com id: " + id));
     }
@@ -110,7 +111,7 @@ public class CategoryService {
                 .orElseThrow(() ->
                         new BusinessException("Usuário não encontrado"));
 
-        Category category = categoryRepository.findByIdAndUser(id, user.getId())
+        Category category = categoryRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() ->
                         new BusinessException("Categoria não encontrada!"));
 
@@ -124,7 +125,7 @@ public class CategoryService {
                 .orElseThrow(() ->
                         new BusinessException("Usuário não encontrado"));
 
-        Category category = categoryRepository.findByIdAndUser(id, user.getId())
+        Category category = categoryRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() ->
                         new EntityNotFoundException("Categoria não encontrada!"));
 
@@ -138,7 +139,7 @@ public class CategoryService {
                 .orElseThrow(() ->
                         new BusinessException("Usuário não encontrado"));
 
-        Category category = categoryRepository.findByIdAndUser(id, user.getId())
+        Category category = categoryRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Categoria de despesa não encontrada com id: " + id));
 

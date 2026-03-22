@@ -11,10 +11,10 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    List<Category> findAllByUser(Long userId);
-    Optional<Category> findByIdAndUser(Long id, Long userId);
-    Category findByNameAndTypeAndUser(String name, TransactionType type, Long userId);
-    boolean existsByNameAndTypeAndUser(String name, TransactionType type, Long userId);
+    List<Category> findAllByUserId(Long userId);
+    Optional<Category> findByIdAndUserId(Long id, Long userId);
+    Category findByNameAndTypeAndUserId(String name, TransactionType type, Long userId);
+    boolean existsByNameAndTypeAndUserId(String name, TransactionType type, Long userId);
 
 }
 
