@@ -8,6 +8,7 @@ import com.inge.accounts.domain.validations.OnCreate;
 import com.inge.accounts.response.ApiResponse;
 import com.inge.accounts.services.ExpensesService;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -50,20 +51,14 @@ public class ExpensesController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<ExpenseSearchResponseDto>> findExpenses(
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) String name,
             Authentication authentication) {
 
         String username = authentication.getName();
 
         ExpenseSearchResponseDto response;
-
-        if (startDate == null && endDate == null && name == null) {
-            response = service.findAllByUser(username);
-
-            return ResponseEntity.ok(ApiResponse.success("Consulta realizada", response));
-        }
 
         response = service.findExpensesByUser(startDate, endDate, name, username);
 

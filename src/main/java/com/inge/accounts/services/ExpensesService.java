@@ -9,6 +9,15 @@ import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
 import com.inge.accounts.repository.UserRepository;
+import com.inge.accounts.specification.ExpensesSpecification;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +33,9 @@ public class ExpensesService {
     private final ExpensesRepository expensesRepository;
     private final CategoryService categoryService;
     private final UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ExpensesService(ExpensesRepository expensesRepository,
                            CategoryService categoryService,
@@ -74,7 +86,8 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<Expenses> expenses = expensesRepository.findExpensesByUserId(null, null, dto.name(), user.getId());
+        Specification<Expenses> spec = ExpensesSpecification.filter(user.getId(), null, null, dto.name());
+        List<Expenses> expenses =  expensesRepository.findAll(spec);
 
         Expenses lastExpense =  expenses.stream()
                 .max(Comparator.comparing(Expenses::getInstallment))
@@ -97,32 +110,6 @@ public class ExpensesService {
 
             expensesRepository.save(newExpense);
         }
-    }
-
-    @Transactional(readOnly = true)
-    public ExpenseSearchResponseDto findAllByUser(String username) {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
-
-        List<ExpensesDto> list = expensesRepository.findAllByUserId(user.getId())
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        if (list.isEmpty()) {
-            throw new BusinessException("A lista de despesas está vazia.");
-        }
-
-        LocalDate startDate = null;
-        LocalDate endDate = null;
-        String name = null;
-
-        BigDecimal total = expensesRepository.sumValueTotalExpensesByUserId(startDate, endDate, name, user.getId());
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpensesByUserId(startDate, endDate, name, user.getId());
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpensesByUserId(startDate, endDate, name, user.getId());
-
-        return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
     }
 
     @Transactional(readOnly = true)
@@ -234,15 +221,38 @@ public class ExpensesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
-        List<ExpensesDto> list = expensesRepository.findExpensesByUserId(startDate, endDate, name, user.getId())
+        Specification<Expenses> spec = ExpensesSpecification.filter(user.getId(), startDate, endDate, name);
+
+        List<ExpensesDto> list =  expensesRepository.findAll(spec)
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
 
-        BigDecimal total = expensesRepository.sumValueTotalExpensesByUserId(startDate, endDate, name, user.getId());
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpensesByUserId(startDate, endDate, name, user.getId());
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpensesByUserId(startDate, endDate, name, user.getId());
+        BigDecimal total = sumTotal(spec);
+
+        Specification<Expenses> paidSpec = spec.and((root, query, cb) -> cb.isTrue(root.get("payment")));
+        BigDecimal totalPaid = sumTotal(paidSpec);
+
+        Specification<Expenses> unpaidSpec = spec.and((root, query, cb) -> cb.isFalse(root.get("payment")));
+        BigDecimal totalUnpaid = sumTotal(unpaidSpec);
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
+    }
+
+    public BigDecimal sumTotal(Specification<Expenses> spec) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<BigDecimal> query = cb.createQuery(BigDecimal.class);
+        Root<Expenses> root = query.from(Expenses.class);
+
+        Predicate predicate = spec.toPredicate(root, query, cb);
+
+        query.select(
+                cb.coalesce(cb.sum(root.get("value")), BigDecimal.ZERO)
+        );
+
+        query.where(predicate);
+
+        return entityManager.createQuery(query).getSingleResult();
     }
 }
