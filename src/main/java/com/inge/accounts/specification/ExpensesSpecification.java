@@ -27,7 +27,7 @@ public class ExpensesSpecification {
             }
 
             if (endDate != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), endDate));
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), endDate));
             }
 
             if (name != null && !name.isBlank()) {
