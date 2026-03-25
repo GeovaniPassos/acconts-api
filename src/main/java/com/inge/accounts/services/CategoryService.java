@@ -9,6 +9,7 @@ import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.CategoryRepository;
 import com.inge.accounts.repository.UserRepository;
+import com.inge.accounts.utils.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,10 +82,6 @@ public class CategoryService {
                 .map(CategoryMapper::toDto)
                 .toList();
 
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma categoria encontrada.");
-        }
-
         return list;
     }
 
@@ -144,5 +141,20 @@ public class CategoryService {
                         "Categoria de despesa não encontrada com id: " + id));
 
         CategoryMapper.copyNonNullProperties(category, dto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryDto> findByName(String name) {
+
+        if(StringUtils.isNullOrBlank(name)) {
+            throw new BusinessException("O nome não pode ser nulo.");
+        }
+
+        List<CategoryDto> list = categoryRepository.findByNameContainsIgnoreCase(name)
+                .stream()
+                .map(CategoryMapper::toDto)
+                .toList();
+
+        return list;
     }
 }

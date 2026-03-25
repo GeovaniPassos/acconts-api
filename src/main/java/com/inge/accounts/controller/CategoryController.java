@@ -74,10 +74,17 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<ApiResponse<Void>> patchByUser(@PathVariable @NonNull Long id, @RequestBody CategoryPatchDto dto,
+    public ResponseEntity<ApiResponse<Void>> patchByUser(@PathVariable @NonNull Long id, @RequestBody CategoryPatchDto dto,
                                                           Authentication authentication) {
         String user = authentication.getName();
         service.patchByUser(id, dto, user);
         return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<CategoryDto>>> findByNameContainsIgnoreCase(@RequestParam String name ) {
+        List<CategoryDto> list = service.findByName(name);
+
+        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
     }
 }
