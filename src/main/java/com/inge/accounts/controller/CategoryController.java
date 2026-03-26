@@ -83,8 +83,7 @@ public class CategoryController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<CategoryDto>>> findByNameContainsIgnoreCase(@RequestParam String name ) {
-        List<CategoryDto> list = service.findBytus
-        Name(name);
+        List<CategoryDto> list = service.findByName(name);
 
         return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
     }
