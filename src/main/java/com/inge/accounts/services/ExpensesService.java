@@ -10,13 +10,13 @@ import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
 import com.inge.accounts.repository.UserRepository;
 import com.inge.accounts.specification.ExpensesSpecification;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -223,7 +223,7 @@ public class ExpensesService {
 
         Specification<Expenses> spec = ExpensesSpecification.filter(user.getId(), startDate, endDate, name);
 
-        List<ExpensesDto> list =  expensesRepository.findAll(spec)
+        List<ExpensesDto> list =  expensesRepository.findAll(spec, Sort.by("date", "name"))
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();

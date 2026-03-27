@@ -16,10 +16,8 @@ public class Expenses {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
     private String description;
 
-    @Column(nullable = true)
     private BigDecimal value;
 
     @ManyToOne(fetch = FetchType.LAZY,
@@ -30,7 +28,6 @@ public class Expenses {
     @Column(nullable = false)
     private int installment;
 
-    @Column(nullable = false)
     private int totalInstallments;
 
     @Column(nullable = false)
