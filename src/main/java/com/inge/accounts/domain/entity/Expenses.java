@@ -16,10 +16,8 @@ public class Expenses {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
     private String description;
 
-    @Column(nullable = true)
     private BigDecimal value;
 
     @ManyToOne(fetch = FetchType.LAZY,
@@ -30,7 +28,6 @@ public class Expenses {
     @Column(nullable = false)
     private int installment;
 
-    @Column(nullable = false)
     private int totalInstallments;
 
     @Column(nullable = false)
@@ -41,6 +38,10 @@ public class Expenses {
 
     @Column
     private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Long getId() {
         return id;
@@ -104,5 +105,17 @@ public class Expenses {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -3,18 +3,26 @@ package com.inge.accounts.services;
 import com.inge.accounts.domain.dto.*;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
+import com.inge.accounts.domain.entity.User;
 import com.inge.accounts.domain.enums.TransactionType;
-import com.inge.accounts.domain.mapper.CategoryMapper;
 import com.inge.accounts.domain.mapper.ExpensesMapper;
 import com.inge.accounts.exceptions.BusinessException;
 import com.inge.accounts.repository.ExpensesRepository;
-import com.inge.accounts.utils.StringUtils;
+import com.inge.accounts.repository.UserRepository;
+import com.inge.accounts.specification.ExpensesSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.*;
 
 import static com.inge.accounts.domain.mapper.ExpensesMapper.toAddInstallmentsDto;
@@ -24,19 +32,28 @@ public class ExpensesService {
 
     private final ExpensesRepository expensesRepository;
     private final CategoryService categoryService;
+    private final UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ExpensesService(ExpensesRepository expensesRepository,
-                           CategoryService categoryService) {
+                           CategoryService categoryService,
+                           UserRepository userRepository) {
         this.expensesRepository = expensesRepository;
         this.categoryService = categoryService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public void createExpenses(ExpensesDto dto) {
+    public void createExpenses(String username, ExpensesDto dto) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         //Se a despesa já existir, inserir parcela
-        if (!expensesRepository.findByName(dto.name()).isEmpty()) {
-            addInstallments(toAddInstallmentsDto(dto));
+        if (expensesRepository.existsByNameAndUserId(dto.name(), user.getId())) {
+            addInstallmentsByUser(toAddInstallmentsDto(dto), username);
             return;
         }
 
@@ -44,14 +61,14 @@ public class ExpensesService {
             throw new BusinessException("Deve ser informado a categoria.");
         }
 
-        Category category = categoryService.findOrCreate(dto.categoryName(), TransactionType.EXPENSES);
+        Category category = categoryService.findOrCreateByUser(dto.categoryName(), TransactionType.EXPENSES, username);
 
         LocalDate baseDate = dto.date();
         int total = dto.totalInstallments();
 
         for(int i = 1; i <= total ;i++) {
 
-            Expenses expense = ExpensesMapper.toEntity(dto, category);
+            Expenses expense = ExpensesMapper.toEntity(dto, category, user);
 
             expense.setInstallment(i);
             expense.setTotalInstallments(total);
@@ -64,9 +81,13 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void addInstallments(ExpensesAddInstallmentsDto dto) {
+    public void addInstallmentsByUser(ExpensesAddInstallmentsDto dto, String username) {
 
-        List<Expenses> expenses = expensesRepository.findByName(dto.name());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Specification<Expenses> spec = ExpensesSpecification.filter(user.getId(), null, null, dto.name());
+        List<Expenses> expenses =  expensesRepository.findAll(spec);
 
         Expenses lastExpense =  expenses.stream()
                 .max(Comparator.comparing(Expenses::getInstallment))
@@ -80,7 +101,10 @@ public class ExpensesService {
         for(int i = 1; i <= dto.installments(); i++){
             Expenses newExpense = ExpensesMapper.copyExpensesAddInstallments(lastExpense, newTotalInstallments);
 
+            newExpense.setUser(user);
+
             newExpense.setInstallment(lastExpense.getInstallment() + i);
+
             if (dto.value() != null) newExpense.setValue(dto.value());
             newExpense.setDate(lastDate.plusMonths(i));
 
@@ -89,54 +113,45 @@ public class ExpensesService {
     }
 
     @Transactional(readOnly = true)
-    public ExpenseSearchResponseDto findAll() {
-        List<ExpensesDto> list = expensesRepository.findAll()
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
+    public ExpensesDto findByIdAndUser(Long id, String username) {
 
-        if (list.isEmpty()) {
-            throw new BusinessException("A lista de despesas está vazia.");
-        }
-
-        LocalDate startDate = null;
-        LocalDate endDate = null;
-        String name = null;
-
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
-
-        return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
-    }
-
-    @Transactional(readOnly = true)
-    public ExpensesDto findById(Long id) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new BusinessException("Usuário não encontrado"));
 
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
         }
 
-        return expensesRepository.findById(id)
+        return expensesRepository.findByIdAndUserId(id, user.getId())
                 .map(ExpensesMapper::toDto).orElseThrow(() ->
                         new BusinessException("Despesa não encontrada com o id: " + id));
     }
 
     @Transactional
-    public void delete(Long id) {
-        Expenses expenses = expensesRepository.findById(id)
+    public void deleteByUser(Long id, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new BusinessException("Usuário não encontrado"));
+
+        Expenses expenses = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() ->
                         new BusinessException("Despesa não encontrada!"));
         expensesRepository.delete(expenses);
     }
 
     @Transactional
-    public void patch(Long id, ExpensesPatchDto dto) {
+    public void patchByUser(Long id, ExpensesPatchDto dto, String username) {
+
         if (id == null) {
             throw new BusinessException("O id não pode ser nulo.");
         }
 
-        Expenses expenses = expensesRepository.findById(id)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Expenses expenses = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BusinessException(
                         "Despesa não encontrada para edição."));
 
@@ -149,8 +164,8 @@ public class ExpensesService {
         }
 
         if (dto.categoryName() != null) {
-            Category category = categoryService.findOrCreate(
-                    dto.categoryName(), TransactionType.EXPENSES);
+            Category category = categoryService.findOrCreateByUser(
+                    dto.categoryName(), TransactionType.EXPENSES, username);
             expenses.setCategory(category);
         }
 
@@ -177,12 +192,16 @@ public class ExpensesService {
     }
 
     @Transactional
-    public void togglePayment(Long id) {
+    public void togglePaymentByUser(Long id, String username) {
+
         if (id == null) {
             throw new BusinessException("Id não pode ser nulo.");
         }
 
-        Expenses expense = expensesRepository.findById(id)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Expenses expense = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BusinessException("Despesa não encontrada."));
 
         boolean newStatus = !expense.isPayment();
@@ -197,70 +216,43 @@ public class ExpensesService {
         ExpensesMapper.toDto(expense);
     }
 
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByPeriod(LocalDate startDate, LocalDate endDate) {
-        if (startDate.isAfter(endDate)) {
-            throw new BusinessException("Data inicial não pode ser maior que a final.");
-        }
+    public ExpenseSearchResponseDto findExpensesByUser(LocalDate startDate, LocalDate endDate, String name, String username) {
 
-        List<ExpensesDto> list = expensesRepository.findByDateBetween(startDate, endDate)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        Specification<Expenses> spec = ExpensesSpecification.filter(user.getId(), startDate, endDate, name);
+
+        List<ExpensesDto> list =  expensesRepository.findAll(spec, Sort.by("date", "name"))
                 .stream()
                 .map(ExpensesMapper::toDto)
                 .toList();
 
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada no periodo");
-        }
+        BigDecimal total = sumTotal(spec);
 
-        return list;
-    }
+        Specification<Expenses> paidSpec = spec.and((root, query, cb) -> cb.isTrue(root.get("payment")));
+        BigDecimal totalPaid = sumTotal(paidSpec);
 
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByMonth(YearMonth yearMonth) {
-        LocalDate start = yearMonth.atDay(1);
-        LocalDate end = yearMonth.atEndOfMonth();
-
-        List<ExpensesDto> list = expensesRepository.findByDateBetween(start, end)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada no periodo.");
-        }
-
-        return list;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ExpensesDto> findByName(String name) {
-        if (StringUtils.isNullOrBlank(name)) {
-            throw new BusinessException("O nome não pode ser nulo na pesquisa!");
-        }
-
-        List<ExpensesDto> list = expensesRepository.findByNameContainsIgnoreCase(name)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        if (list.isEmpty()) {
-            throw new BusinessException("Nenhuma despesa encontrada com o nome.");
-        }
-
-        return list;
-    }
-
-    public ExpenseSearchResponseDto findExpenses(LocalDate startDate, LocalDate endDate, String name) {
-
-        List<ExpensesDto> list = expensesRepository.findExpenses(startDate, endDate, name)
-                .stream()
-                .map(ExpensesMapper::toDto)
-                .toList();
-
-        BigDecimal total = expensesRepository.sumValueTotalExpenses(startDate, endDate, name);
-        BigDecimal totalPaid = expensesRepository.sumValueTotalPaidExpenses(startDate, endDate, name);
-        BigDecimal totalUnpaid = expensesRepository.sumValueTotalUnpaidExpenses(startDate, endDate, name);
+        Specification<Expenses> unpaidSpec = spec.and((root, query, cb) -> cb.isFalse(root.get("payment")));
+        BigDecimal totalUnpaid = sumTotal(unpaidSpec);
 
         return new ExpenseSearchResponseDto(list, total, totalPaid, totalUnpaid);
+    }
+
+    public BigDecimal sumTotal(Specification<Expenses> spec) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<BigDecimal> query = cb.createQuery(BigDecimal.class);
+        Root<Expenses> root = query.from(Expenses.class);
+
+        Predicate predicate = spec.toPredicate(root, query, cb);
+
+        query.select(
+                cb.coalesce(cb.sum(root.get("value")), BigDecimal.ZERO)
+        );
+
+        query.where(predicate);
+
+        return entityManager.createQuery(query).getSingleResult();
     }
 }

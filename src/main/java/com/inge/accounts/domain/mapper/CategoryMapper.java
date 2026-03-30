@@ -41,10 +41,10 @@ public class CategoryMapper {
     }
 
     public static void copyNonNullProperties(Category entity, CategoryPatchDto dto) {
-        if (!dto.name().isBlank()) {
+        if (dto.name() != null && !dto.name().isBlank()) {
             entity.setName(dto.name());
         }
-        if (!dto.type().isBlank()) {
+        if (dto.type() != null && !dto.type().isBlank()) {
             entity.setType(TransactionType.valueOf(dto.type()));
         }
     }
