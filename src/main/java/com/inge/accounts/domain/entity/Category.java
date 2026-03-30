@@ -18,9 +18,14 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    public Category(String name, TransactionType type) {
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    public Category(String name, TransactionType type, User user) {
         this.name = name;
         this.type = type;
+        this.user = user;
     }
 
     public Long getId() {
@@ -50,5 +55,11 @@ public class Category {
     public Category() {
     }
 
+    public User getUser() {
+        return user;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

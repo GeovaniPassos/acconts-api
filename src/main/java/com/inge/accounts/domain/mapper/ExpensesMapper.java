@@ -4,6 +4,7 @@ import com.inge.accounts.domain.dto.ExpensesAddInstallmentsDto;
 import com.inge.accounts.domain.dto.ExpensesDto;
 import com.inge.accounts.domain.entity.Category;
 import com.inge.accounts.domain.entity.Expenses;
+import com.inge.accounts.domain.entity.User;
 
 import java.math.BigDecimal;
 
@@ -11,7 +12,7 @@ public class ExpensesMapper {
     
     private ExpensesMapper() {}
     
-    public static Expenses toEntity(ExpensesDto dto, Category category) {
+    public static Expenses toEntity(ExpensesDto dto, Category category, User user) {
         if (dto == null) return null;
 
         Expenses expenses = new Expenses();
@@ -24,6 +25,7 @@ public class ExpensesMapper {
         expenses.setValue(dto.value());
         expenses.setPaymentDate(dto.paymentDate());
         expenses.setDate(dto.date());
+        expenses.setUser(user);
 
         return expenses;
     }

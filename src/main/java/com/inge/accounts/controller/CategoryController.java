@@ -9,6 +9,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.inge.accounts.domain.validations.OnCreate;
@@ -28,47 +29,62 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> create(@Validated(OnCreate.class) @RequestBody CategoryDto dto) {
-        service.create(dto);
+    public ResponseEntity<ApiResponse<Void>> createByUser(@Validated(OnCreate.class) @RequestBody CategoryDto dto,
+                                                    Authentication authentication) {
+
+        String username = authentication.getName();
+        service.createByUser(dto, username);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Categoria criada com sucesso"));
     }
 
     @GetMapping
-    public  ResponseEntity<ApiResponse<List<CategoryDto>>> findAll() {
+    public  ResponseEntity<ApiResponse<List<CategoryDto>>> findAllByUser(Authentication authentication) {
 
-        List<CategoryDto> list = service.findAll();
-
+        String username = authentication.getName();
+        List<CategoryDto> list = service.findAllByUser(username);
         return ResponseEntity.ok(
                 ApiResponse.success("Resultado da busca", list));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryDto>> findById(@PathVariable @NonNull Long id) {
-
-        CategoryDto list = service.findById(id);
-
+    public ResponseEntity<ApiResponse<CategoryDto>> findByIdAndUser(@PathVariable @NonNull Long id,
+                                                             Authentication authentication) {
+        String user = authentication.getName();
+        CategoryDto list = service.findByIdAndUser(id, user);
         return ResponseEntity.ok(
                 ApiResponse.success("Resultado da busca", list));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<ApiResponse<Void>> deleteByUser(@PathVariable Long id, Authentication authentication) {
+
+        String user = authentication.getName();
+        service.deleteByUser(id, user);
         return ResponseEntity.ok(ApiResponse.success("Categoria removida com sucesso"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> update(@Validated(OnUpdate.class)  @PathVariable @NonNull Long id, @RequestBody CategoryDto dto) {
-        service.update(id, dto);
-
+    public ResponseEntity<ApiResponse<Void>> updateByUser(@Validated(OnUpdate.class)  @PathVariable @NonNull Long id,
+                                                          @RequestBody CategoryDto dto,
+                                                          Authentication authentication) {
+        String user = authentication.getName();
+        service.updateByUser(id, dto, user);
         return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<ApiResponse<Void>> patch(@PathVariable @NonNull Long id, @RequestBody CategoryPatchDto dto) {
-        service.patch(id, dto);
-
+    public ResponseEntity<ApiResponse<Void>> patchByUser(@PathVariable @NonNull Long id, @RequestBody CategoryPatchDto dto,
+                                                          Authentication authentication) {
+        String user = authentication.getName();
+        service.patchByUser(id, dto, user);
         return ResponseEntity.ok(ApiResponse.success("Categoria atualizada com sucesso"));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<CategoryDto>>> findByNameContainsIgnoreCase(@RequestParam String name ) {
+        List<CategoryDto> list = service.findByName(name);
+
+        return ResponseEntity.ok(ApiResponse.success("Resultado da busca", list));
     }
 }

@@ -11,15 +11,20 @@ public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigure() {
         return new WebMvcConfigurer() {
+
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+
                 registry.addMapping("/**")
-                        .allowedOrigins("http://127.0.0.1:5500",
+                        .allowedOrigins(
+                                "http://127.0.0.1:5500",
                                 "https://geovanipassos.github.io"
                         )
-                        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
+                        .allowedMethods(
+                                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+                        )
                         .allowedHeaders("*")
-                        .allowCredentials(false);
+                        .allowCredentials(true);
             }
         };
     }
