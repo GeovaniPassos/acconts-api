@@ -12,13 +12,12 @@ public record ExpensesDto(Long id,
                           String name,
                           String description,
                           @NotBlank(groups= OnCreate.class,
-                                  message="O categoria não pode ser nula.")
+                                  message="A categoria não pode ser nula.")
                           String categoryName,
                           int installment,
                           int totalInstallments,
-                          boolean payment,
+                          Boolean payment,
                           BigDecimal value,
                           LocalDate paymentDate,
                           LocalDate date
-) {
-}
+) {}

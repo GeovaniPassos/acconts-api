@@ -253,6 +253,6 @@ public class ExpensesService {
 
         query.where(predicate);
 
-        return entityManager.createQuery(query).getSingleResult();
+        return  entityManager.createQuery(query).getSingleResult();
     }
 }
