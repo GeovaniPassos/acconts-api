@@ -25,9 +25,6 @@ public class ReceiptService {
     private final CategoryService categoryService;
     private final UserRepository userRepository;
 
-    @PersistenceContext
-    public EntityManager entityManager;
-
     public ReceiptService(ReceiptRepository receiptRepository,
                            CategoryService categoryService,
                            UserRepository userRepository) {
@@ -37,7 +34,7 @@ public class ReceiptService {
     }
 
     @Transactional
-    public void createReceipt(String username, ReceiptDto dto) {
+    public void createReceiptByUser(String username, ReceiptDto dto) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
@@ -51,5 +48,22 @@ public class ReceiptService {
         Receipt receipt = ReceiptMapper.toEntity(dto, category, user);
 
         receiptRepository.save(receipt);
+    }
+
+    @Transactional(readOnly = true)
+    public ReceiptDto findByIdAndUser(Long id, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new BusinessException("Usuário não encontrado"));
+
+        if (id == null) {
+            throw new BusinessException("O id não pode ser nulo.");
+        }
+
+        return receiptRepository.findByIdAndUserId(id, user.getId())
+                .map(ReceiptMapper::toDto)
+                .orElseThrow(() ->
+                        new BusinessException("Receita não encontrada com o id: " + id));
     }
 }
