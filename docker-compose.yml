@@ -3,7 +3,7 @@ services:
     image: postgres:16
     container_name: postgres_bd
     env_file:
-      - .env
+      - env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

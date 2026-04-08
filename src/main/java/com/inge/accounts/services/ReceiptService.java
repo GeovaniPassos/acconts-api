@@ -50,5 +50,6 @@ public class ReceiptService {
 
         Receipt receipt = ReceiptMapper.toEntity(dto, category, user);
 
+        receiptRepository.save(receipt);
     }
 }
