@@ -5,6 +5,7 @@ import com.inge.accounts.domain.validations.OnCreate;
 import jakarta.validation.constraints.NotBlank;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 public record ReceiptDto(Long id,
@@ -16,5 +17,5 @@ public record ReceiptDto(Long id,
                                 message="A categoria não pode ser nula.")
                          String categoryName,
                          BigDecimal value,
-                         Date date
+                         LocalDate date
 ) {}

@@ -3,6 +3,7 @@ package com.inge.accounts.domain.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -27,7 +28,7 @@ public class Receipt {
     private BigDecimal value;
 
     @Column(nullable = false)
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -69,11 +70,11 @@ public class Receipt {
         this.category = category;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
