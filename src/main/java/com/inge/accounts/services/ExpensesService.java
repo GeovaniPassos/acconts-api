@@ -132,8 +132,7 @@ public class ExpensesService {
     public void deleteByUser(Long id, String username) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new BusinessException("Usuário não encontrado"));
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         Expenses expenses = expensesRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() ->
@@ -216,6 +215,7 @@ public class ExpensesService {
         ExpensesMapper.toDto(expense);
     }
 
+    @Transactional
     public ExpenseSearchResponseDto findExpensesByUser(LocalDate startDate, LocalDate endDate, String name, String username) {
 
         User user = userRepository.findByUsername(username)
@@ -253,6 +253,6 @@ public class ExpensesService {
 
         query.where(predicate);
 
-        return entityManager.createQuery(query).getSingleResult();
+        return  entityManager.createQuery(query).getSingleResult();
     }
 }
