@@ -2,6 +2,8 @@ package com.inge.accounts.domain.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,17 +19,20 @@ public class Receipt {
 
     private String description;
 
-    @Column(nullable = false)
-    private double value;
-
-
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(nullable = false)
-    private Date date;
+    private BigDecimal value;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Long getId() {
         return id;
@@ -49,11 +54,11 @@ public class Receipt {
         this.description = description;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
@@ -65,14 +70,15 @@ public class Receipt {
         this.category = category;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public Receipt() {
-    }
+    public User getUser() {return user;}
+
+    public void setUser(User user) {this.user = user;}
 }

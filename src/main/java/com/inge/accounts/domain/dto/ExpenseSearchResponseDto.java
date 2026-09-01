@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class ExpenseSearchResponseDto {
+
     private List<ExpensesDto> expenses;
     private BigDecimal total;
     private BigDecimal totalPaid;
