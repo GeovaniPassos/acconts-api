@@ -13,19 +13,19 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-#  api:
-#    build: .
-#    container_name:  accounts-api
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - postgres
-#    env_file:
-#    - .env
-#    environment:
-#      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-#      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-#      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-#      JWT_SECRET: ${JWT_SECRET}
+  api:
+    build: .
+    container_name:  accounts-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    env_file:
+    - .env
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
 volumes:
   pgdata:

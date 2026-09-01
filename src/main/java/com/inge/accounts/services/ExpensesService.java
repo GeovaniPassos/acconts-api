@@ -52,10 +52,10 @@ public class ExpensesService {
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         //Se a despesa já existir, inserir parcela
-        if (expensesRepository.existsByNameAndUserId(dto.name(), user.getId())) {
+        /*if (expensesRepository.existsByNameAndUserId(dto.name(), user.getId())) {
             addInstallmentsByUser(toAddInstallmentsDto(dto), username);
             return;
-        }
+        }*/
 
         if (dto.categoryName() == null) {
             throw new BusinessException("Deve ser informado a categoria.");
