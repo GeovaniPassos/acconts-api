@@ -46,16 +46,15 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response,
                                                    authException) -> {
+                            String message = (String) request.getAttribute("jwtError");
+                            if (message == null) {
+                                message = "Token ausente ou inválido";
+                            }
+
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-
-                            response.getWriter().write("""
-                    {
-                        "status": 401,
-                        "error": "Não autenticado",
-                        "message": "Token ausente ou inválido"
-                    }
-                """);
+                            response.getWriter().write("{\"status\":401,\"error\":\"Não autenticado\",\"message\":\""
+                                    + message + "\"}");
                         })
                         .accessDeniedHandler((request, response,
                                               accessDeniedException) -> {

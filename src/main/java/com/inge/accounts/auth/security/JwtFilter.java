@@ -1,5 +1,7 @@
 package com.inge.accounts.auth.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,16 +40,22 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String token = header.substring(7);
 
-            String username = jwtService.extractUsername(token);
+            try {
+                String username = jwtService.extractUsername(token);
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                    );
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                username,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        );
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (ExpiredJwtException exception) {
+                request.setAttribute("jwtError", "Token expirado. Faça login novamente.");
+            } catch (JwtException | IllegalArgumentException exception) {
+                request.setAttribute("jwtError", "Token inválido. Faça login novamente.");
+            }
         }
 
         filterChain.doFilter(request, response);
