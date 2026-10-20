@@ -9,7 +9,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      # 5432 já é utilizada pelo PostgreSQL local; dentro da rede Docker o
+      # serviço continua disponível na porta padrão 5432.
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
